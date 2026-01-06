@@ -1,0 +1,91 @@
+# Build outputs
+**/target/
+**/build/
+**/out/
+**/temp_jar/
+
+# IDE files
+**/.idea/
+**/.vscode/
+**/*.iml
+**/.profileconfig.json
+
+# Gradle
+**/.gradle/
+**/gradle-app.setting
+**/.gradletasknamecache
+
+# Maven
+**/dependency-reduced-pom.xml
+
+# Logs
+**/*.log
+**/build_*.txt
+**/compile_*.txt
+**/client_debug_*.log
+
+# OS files
+**/.DS_Store
+**/Thumbs.db
+
+# Temporary files
+**/*.tmp
+**/*.temp
+**/*.swp
+**/*.swo
+**/~*
+
+# Data files (user-specific)
+**/data/saves/
+**/data/logs/
+**/data/filestore/
+**/data/clipping/
+
+# Cache files (Strict exclusion of heavy binaries)
+**/main_file_cache.*
+**/data/cache/*
+!**/data/cache/
+server/data/cache/*
+!server/data/cache/
+cache-server/data/*
+!cache-server/data/
+cache-server/data.zip
+**/*.dat2
+**/*.idx*
+**/*.dat
+**/*.gz
+
+# Allow valuable data definitions despite above rules
+!**/data/**/*.json
+!**/data/**/*.yml
+!**/data/**/*.yaml
+!**/data/**/*.cfg
+!**/data/**/*.txt
+
+# Compiled class files
+**/*.class
+
+# Archives
+**/*.zip
+**/*.jar
+!**/gradle/wrapper/gradle-wrapper.jar
+
+# Server specific
+**/votes.ini
+**/1 serv.bat
+
+# Client specific
+**/profile.jfr
+**/Shit.json
+**/temp_settings_search.txt
+**/colordump.txt
+
+# Backup folders
+*backup*/
+*Backup*/
+zenyte*/
+Zenyte*/
+
+# Functions
+**/functions/
+**/functions-*.jar
