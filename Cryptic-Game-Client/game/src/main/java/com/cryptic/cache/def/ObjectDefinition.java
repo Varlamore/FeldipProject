@@ -282,23 +282,54 @@ public final class ObjectDefinition extends DualNode implements RSObjectComposit
         String[] dynamicActions = (this.actions != null) ? this.actions.clone() : new String[5];
 
         // Blanket Suppression: Remove "Chop down" or "Chop-down" from ANY slot
-        if (this.actions != null) {
-            for (int i = 0; i < dynamicActions.length; i++) {
-                if (dynamicActions[i] != null &&
-                        (dynamicActions[i].equalsIgnoreCase("Chop down")
-                                || dynamicActions[i].equalsIgnoreCase("Chop-down"))) {
-                    dynamicActions[i] = null; // Suppress it
-                }
-            }
-        }
+        // DISABLED: We need "Chop down" for fully grown fruit trees to clear them (Chop
+        // -> Stump -> Dig).
+        /*
+         * if (this.actions != null) {
+         * for (int i = 0; i < dynamicActions.length; i++) {
+         * if (dynamicActions[i] != null &&
+         * (dynamicActions[i].equalsIgnoreCase("Chop down")
+         * || dynamicActions[i].equalsIgnoreCase("Chop-down"))) {
+         * dynamicActions[i] = null; // Suppress it
+         * }
+         * }
+         * }
+         */
 
         // Get varbit value to check tree state
         int varbitVal = getVarbit(parentDef.transformVarbit);
 
         // Varbit 14 = UNCHECKED state -> INSERT "Check-health" in slot 0
-        // Result: [Check-health, Inspect, null, Guide, null]
-        if (varbitVal == 14) {
-            dynamicActions[0] = "Check-health";
+        // BUT also used for EMPTY state -> Needs "Chop down"
+        // Solution: Use Varp 1100 metadata to distinguish.
+        // Bits: (VarbitID % 16) * 2.
+        // Value 1 = Empty (Chop), 2 = Unchecked (Check-health).
+        if (varbitVal == 14 || varbitVal == 41 || varbitVal == 78 || varbitVal == 105 || varbitVal == 142
+                || varbitVal == 169 || varbitVal == 206 || varbitVal == 233) {
+            int shift = (parentDef.transformVarbit % 16) * 2;
+            int state = (com.cryptic.model.content.VarbitManager
+                    .getVarp(ClientConstants.FRUIT_TREE_STATE_VARP) >> shift) & 3;
+
+            if (state == 2) { // Unchecked
+                dynamicActions[0] = "Check-health";
+                dynamicActions[1] = "Inspect";
+                dynamicActions[2] = null;
+                dynamicActions[3] = "Guide";
+                dynamicActions[4] = null;
+            } else if (state == 1) { // Empty
+                dynamicActions[0] = "Chop down";
+                dynamicActions[1] = "Inspect";
+                dynamicActions[2] = null;
+                dynamicActions[3] = "Guide";
+                dynamicActions[4] = null;
+            } else {
+                // Fallback
+                dynamicActions[0] = "Check-health";
+                dynamicActions[1] = "Inspect";
+                dynamicActions[2] = "Chop down";
+                dynamicActions[3] = "Guide";
+                dynamicActions[4] = null;
+            }
         }
 
         return dynamicActions;

@@ -37,6 +37,10 @@ public class VarbitManager {
         return Client.instance.settings[baseVar] >> startBit & mask;
     }
 
+    public static int getVarp(int id) {
+        return Client.instance.settings[id];
+    }
+
     /**
      * Hook called whenever a Varp (config) is updated.
      * 

@@ -2,6 +2,7 @@ package com.cryptic.model.entity.player.commands;
 
 import com.cryptic.GameConstants;
 import com.cryptic.cache.definitions.NpcDefinition;
+import com.cryptic.cache.definitions.ObjectDefinition;
 import com.cryptic.cache.definitions.identifiers.NpcIdentifiers;
 import com.cryptic.model.World;
 import com.cryptic.model.content.daily_tasks.DailyTaskManager;
@@ -14,6 +15,7 @@ import com.cryptic.model.content.raids.theatre.boss.xarpus.Xarpus;
 import com.cryptic.model.content.raids.theatre.interactions.TheatreInterface;
 import com.cryptic.model.content.skill.impl.slayer.slayer_task.SlayerTask;
 import com.cryptic.model.content.teleport.world_teleport_manager.TeleportInterface;
+import com.cryptic.model.content.skill.impl.farming.core.PatchLifecycle;
 import com.cryptic.model.content.tournaments.Tournament;
 import com.cryptic.model.content.tournaments.TournamentManager;
 import com.cryptic.model.entity.MovementQueue;
@@ -105,6 +107,7 @@ public class CommandManager {
         locsTeles.put("zammy", new Tile(2901, 5266));
         locsTeles.put("arma", new Tile(2901, 5266));
         locsTeles.put("bando", new Tile(2901, 5266));
+        locsTeles.put("catherby", new Tile(2860, 3433));
     }
 
     public static void loadCmds() {
@@ -127,13 +130,13 @@ public class CommandManager {
         commands.put("wests", new WestsTeleportCommand());
         commands.put("easts", new EastsTeleportCommand());
         commands.put("event", new EventTeleportCommand());
-        //commands.put("kraken", new KrakenCommand());
-        //commands.put("zulrah", new ZulrahCommand());
+        // commands.put("kraken", new KrakenCommand());
+        // commands.put("zulrah", new ZulrahCommand());
         // commands.put("forcemove", new InvulnerableCommand.ForcemoveCommand());
         DuelArenaCommand duelArenaCommand = new DuelArenaCommand();
         // commands.put("duel", duelArenaCommand);
         // commands.put("duelarena", duelArenaCommand);
-        //Regular commands
+        // Regular commands
         commands.put("changepassword", new ChangePasswordCommand());
         commands.put("changepass", new ChangePasswordCommand());
         commands.put("vote", new VoteCommand());
@@ -142,7 +145,7 @@ public class CommandManager {
         commands.put("store", storeCommand);
         commands.put("discord", new DiscordCommand());
         commands.put("rules", new RulesCommand());
-        //refer -> KT command
+        // refer -> KT command
         commands.put("yell", new YellCommand());
         commands.put("master", new MasterCommand());
         commands.put("toggledidyouknow", new ToggleDidYouKnowCommand());
@@ -161,25 +164,25 @@ public class CommandManager {
         commands.put("clearbank", new ClearBankCommand());
         commands.put("togglevialsmash", new ToggleVialSmashCommand());
         commands.put("commands", new CommandsCommand());
-        //commands.put("claimvote", new ClaimVoteCommand());
-        //commands.put("claim", new ClaimCommand());
-        //commands.put("raids", new RaidsTeleportCommand());
-        //commands.put("riskzone", new RiskzoneCommand());
-        //commands.put("vekers", new VekeRSCommand());
-        //commands.put("fpkmerk", new FpkMerkCommand());
-        //commands.put("capalot", new CapalotCommand());
-        //commands.put("primatol", new PrimatolCommand());
-        //commands.put("respire", new RespireCommand());
-        //commands.put("vexia", new VexiaCommand());
-        //commands.put("vihtic", new VihticCommand());
-        //commands.put("smoothie", new SmoothieCommand());
-        //commands.put("ipkmaxjr", new IPKMaxJrCommand());
-        //commands.put("skii", new SkiiCommand());
-        //commands.put("sipsick", new SipSickCommand());
-        //commands.put("walkchaos", new WalkchaosCommand());
+        // commands.put("claimvote", new ClaimVoteCommand());
+        // commands.put("claim", new ClaimCommand());
+        // commands.put("raids", new RaidsTeleportCommand());
+        // commands.put("riskzone", new RiskzoneCommand());
+        // commands.put("vekers", new VekeRSCommand());
+        // commands.put("fpkmerk", new FpkMerkCommand());
+        // commands.put("capalot", new CapalotCommand());
+        // commands.put("primatol", new PrimatolCommand());
+        // commands.put("respire", new RespireCommand());
+        // commands.put("vexia", new VexiaCommand());
+        // commands.put("vihtic", new VihticCommand());
+        // commands.put("smoothie", new SmoothieCommand());
+        // commands.put("ipkmaxjr", new IPKMaxJrCommand());
+        // commands.put("skii", new SkiiCommand());
+        // commands.put("sipsick", new SipSickCommand());
+        // commands.put("walkchaos", new WalkchaosCommand());
         commands.put("features", new FeaturesCommand());
-        //commands.put("raidsguide", new RaidsGuideCommand());
-        //commands.put("promocode", new PromoCodeCommand());
+        // commands.put("raidsguide", new RaidsGuideCommand());
+        // commands.put("promocode", new PromoCodeCommand());
 
         /*
          * Donator commands
@@ -248,10 +251,22 @@ public class CommandManager {
         commands.put("checkip", new CheckIpCommand());
         commands.put("findalt", new CheckIpCommand());
         commands.put("down", new DownCommand());
+        commands.put("dumpanims", new DumpAnimCommand());
+
+        ZebakTestCommand zebakCmd = new ZebakTestCommand();
+        commands.put("zebak_lair", zebakCmd);
+        commands.put("zebak_info", zebakCmd);
+        commands.put("zebak_scan", zebakCmd);
+        commands.put("spawn_zebak", zebakCmd);
+        commands.put("zebak_anim", zebakCmd);
+        commands.put("zebak_cycle", zebakCmd);
+        commands.put("zebak_stop", zebakCmd);
+        commands.put("extract_data", zebakCmd);
 
         /*
          * Dev commands
          */
+        commands.put("farmtest", new FarmingTestCommand());
         commands.put("disabletp", new DisableTradingPostCommand());
         commands.put("disabletplisting", new DisableTpItemListingCommand());
         commands.put("infhp", new InvulnerableCommand());
@@ -276,6 +291,7 @@ public class CommandManager {
         commands.put("fillbank", new FillBankCommand());
         commands.put("debugnpcs", new DebugNpcsCommand());
         commands.put("object", new ObjectCommand());
+        commands.put("debugobject", new DebugObjectCommand());
         commands.put("unlockprayers", new UnlockPrayersCommands());
         commands.put("saveall", new SaveAllCommand());
         commands.put("slayer", new SlayerActionCommand());
@@ -339,7 +355,8 @@ public class CommandManager {
                 if (plr.isPresent()) {
                     plr.get().requestLogout();
                     player.message("Player " + player2 + " (" + plr.get().getUsername() + ") has been kicked.");
-                    Utils.sendDiscordInfoLog(player.getUsername() + " has kicked " + plr.get().getUsername(), "sanctions");
+                    Utils.sendDiscordInfoLog(player.getUsername() + " has kicked " + plr.get().getUsername(),
+                            "sanctions");
                 } else {
                     player.message("Player " + player2 + " does not exist or is not online.");
                 }
@@ -458,7 +475,8 @@ public class CommandManager {
                     t.stop();
                 var distance = t.getRunDuration();
                 int opacity = 200 - (distance * 17);
-                if (opacity <= 30) opacity = 30;
+                if (opacity <= 30)
+                    opacity = 30;
                 p.getPacketSender().darkenScreen(opacity);
             });
         });
@@ -470,15 +488,17 @@ public class CommandManager {
             GameObject throne = GameObject.spawn(VERZIKS_THRONE_32737, 3167, 4324, p.getZ(), 10, 0);
         });
         dev("zt1", (p, cmd, s) -> {
-            /*List<Tile> pillarTiles = List.of(new Tile(3161, 4318, 0),
-                    new Tile(3161, 4312, 0),
-                    new Tile(3161, 4306, 0),
-                    new Tile(3173, 4318, 0),
-                    new Tile(3173, 4312, 0),
-                    new Tile(3173, 4306, 0));
-            for (Tile pillarTile : pillarTiles) {
-                new GameObject(32687, pillarTile.withHeight(p.getZ()), 10, 0).spawn();
-            }*/
+            /*
+             * List<Tile> pillarTiles = List.of(new Tile(3161, 4318, 0),
+             * new Tile(3161, 4312, 0),
+             * new Tile(3161, 4306, 0),
+             * new Tile(3173, 4318, 0),
+             * new Tile(3173, 4312, 0),
+             * new Tile(3173, 4306, 0));
+             * for (Tile pillarTile : pillarTiles) {
+             * new GameObject(32687, pillarTile.withHeight(p.getZ()), 10, 0).spawn();
+             * }
+             */
             // GameObject.spawn(32687, p.tile(), 0, 10);
             MapObjects.get(-1, p.tile()).ifPresent(pillar -> {
                 pillar.setId(32688);
@@ -508,7 +528,7 @@ public class CommandManager {
                 p.inventory().add(i, 1000000);
             }
         });
-        for (String s : new String[]{"cpa", "clipat", "clippos"})
+        for (String s : new String[] { "cpa", "clipat", "clippos" })
             dev(s, (p, cmd, parts) -> {
                 int c = RegionManager.getClipping(p.tile().x, p.tile().y, p.tile().level);
 
@@ -525,12 +545,15 @@ public class CommandManager {
                     int clip = Region.get(x, y).getClip(x, y, player.getZ());
                     int item = clip == 1 ? 227 : baseitem++;
                     if (CLIP.enabled)
-                        CLIP.debug(player, String.format("%s is %s %s = %s %s", new Tile(x, y, player.getZ()), item, new Item(item).name(),
-                            clip, World.clipstr(clip)));
+                        CLIP.debug(player,
+                                String.format("%s is %s %s = %s %s", new Tile(x, y, player.getZ()), item,
+                                        new Item(item).name(),
+                                        clip, World.clipstr(clip)));
                     else
                         System.out.println("clip : " + clip);
                     if (clip != 0) {
-                        GroundItem gi = new GroundItem(new Item(item, 1), Tile.create(x, y, player.tile().level), player);
+                        GroundItem gi = new GroundItem(new Item(item, 1), Tile.create(x, y, player.tile().level),
+                                player);
                         player.getPacketSender().createGroundItem(gi);
                         gis.add(gi);
                     }
@@ -583,7 +606,7 @@ public class CommandManager {
             GroundItemHandler.getGroundItems().clear();
         });
         dev("test11", (p, c, s) -> {
-            CommandManager.attempt(p, "npc 106 1 5 1");  // ID HP AMOUNT RESPAWN=1
+            CommandManager.attempt(p, "npc 106 1 5 1"); // ID HP AMOUNT RESPAWN=1
         });
         dev("olm2", (p, c, s) -> {
             var olm = p.raidsParty.monsters.stream().filter(n -> n.id() == GREAT_OLM_7554).findFirst().get();
@@ -635,7 +658,7 @@ public class CommandManager {
             Chain.noCtx().runFn(15, npc::remove);
         });
 
-        dev("c3", (p,c,s) -> {
+        dev("c3", (p, c, s) -> {
 
         });
 
@@ -643,7 +666,7 @@ public class CommandManager {
             NPC npc = new NPC(11762, new Tile(3934, 5152, 1));
             npc.spawnDirection(NORTH.toInteger());
             npc.spawn(false);
-            //floorAttack(npc, p, FloorSection.LEFT);
+            // floorAttack(npc, p, FloorSection.LEFT);
             // Chain.noCtx().runFn(25, npc::remove);
         });
 
@@ -666,7 +689,8 @@ public class CommandManager {
             p.setInstancedArea(theatre);
             p.setTheatreInstance(theatre);
             theatre.getPlayers().add(p);
-            Verzik verzik = new Verzik(NpcIdentifiers.VERZIK_VITUR_8369, new Tile(3166, 4323, theatre.getzLevel()), theatre);
+            Verzik verzik = new Verzik(NpcIdentifiers.VERZIK_VITUR_8369, new Tile(3166, 4323, theatre.getzLevel()),
+                    theatre);
             verzik.setInstancedArea(p.getTheatreInstance());
             verzik.spawn(false);
         });
@@ -701,12 +725,175 @@ public class CommandManager {
             TradingPost.showTradeHistory(p);
         });
 
+        dev("updatepatch", (p, c, s) -> {
+            int x = p.tile().x;
+            int y = p.tile().y;
+            com.cryptic.model.content.skill.impl.farming.core.FarmingPatch patch = p.getFarmingSystem()
+                    .getPatch(p.tile());
+            if (patch != null) {
+                p.message("Found patch at: " + patch.getBottomLeft());
+                p.message("Varbit: " + patch.getVarbit() + " | Stage: "
+                        + (patch.getPlant() != null ? patch.getPlant().getGrowthStage() : "N/A"));
+
+                patch.updateVarbit();
+                p.message("Forced varbit update.");
+            } else {
+                p.message("No farming patch found at " + x + "," + y);
+            }
+        });
+
+        dev("testmsg", (p, c, s) -> {
+            p.message("Test message triggered at %s", new java.util.Date());
+            System.out.println("Processing testmsg for " + p.getUsername());
+        });
+
+        dev("farmvar", (p, c, s) -> {
+            System.out.println("Processing farmvar command for " + p.getUsername());
+            com.cryptic.model.content.skill.impl.farming.core.FarmingPatch patch = p.getFarmingSystem()
+                    .getPatch(p.tile(), 3);
+            if (patch != null) {
+                int var = Integer.parseInt(s[1]);
+                System.out.println("Found patch " + patch.getVarbit() + " at " + p.tile() + ". Setting to " + var);
+
+                com.cryptic.cache.definitions.VarbitDefinition def = com.cryptic.GameServer.definitions()
+                        .get(com.cryptic.cache.definitions.VarbitDefinition.class, patch.getVarbit());
+                if (def == null) {
+                    System.out.println("CRITICAL: VarbitDefinition for " + patch.getVarbit() + " is NULL!");
+                    p.message("Error: Varbit def missing for " + patch.getVarbit());
+                } else {
+                    System.out.println(
+                            "VarbitDefinition: Varp=" + def.varp + ", Bits=" + def.startbit + "-" + def.endbit);
+                    p.message("Def found. Varp: " + def.varp);
+                    p.getPacketSender().sendVarbit(patch.getVarbit(), var);
+                    p.message("Manually set varbit " + patch.getVarbit() + " to: " + var);
+                }
+            }
+        });
+
+        dev("probe", (p, c, s) -> {
+            com.cryptic.model.content.skill.impl.farming.core.FarmingPatch patch = p.getFarmingSystem()
+                    .getPatch(p.tile(), 3);
+            if (patch == null) {
+                p.message("No patch here.");
+                return;
+            }
+            p.message("Probing Varbits 8 to 40...");
+            com.cryptic.utility.chainedwork.Chain.bound(p).repeatingTask(2, t -> {
+                int val = 8 + t.getRunDuration();
+                if (val > 40) {
+                    t.stop();
+                    p.message("Probing finished.");
+                    return;
+                }
+                p.getPacketSender().sendVarbit(patch.getVarbit(), val);
+                p.message("Current Varbit: " + val);
+            });
+        });
+
+        dev("grow", (p, c, s) -> {
+            com.cryptic.model.content.skill.impl.farming.core.FarmingPatch patch = p.getFarmingSystem()
+                    .getPatch(p.tile(), 3);
+            if (patch != null) {
+                patch.forceGrow();
+            } else {
+                p.message("No patch found nearby.");
+            }
+        });
+
+        dev("farmstage", (p, c, s) -> {
+            com.cryptic.model.content.skill.impl.farming.core.FarmingPatch patch = p.getFarmingSystem()
+                    .getPatch(p.tile(), 3);
+            if (patch != null && patch.getPlant() != null) {
+                int stage = Integer.parseInt(s[1]);
+                patch.getPlant().setGrowthStage(stage);
+                if (stage >= patch.getPlant().getType().getGrowthStages()) {
+                    patch.setLifecycle(com.cryptic.model.content.skill.impl.farming.core.PatchLifecycle.FULLY_GROWN);
+                } else {
+                    patch.setLifecycle(com.cryptic.model.content.skill.impl.farming.core.PatchLifecycle.GROWING);
+                }
+                patch.updateVarbit();
+                p.message("Set growth stage to: " + stage + " (Lifecycle: " + patch.getLifecycle() + ")");
+            } else {
+                p.message("No active plant found under you.");
+            }
+        });
+
+        dev("farmfruit", (p, c, s) -> {
+            com.cryptic.model.content.skill.impl.farming.core.FarmingPatch patch = p.getFarmingSystem()
+                    .getPatch(p.tile(), 3);
+            if (patch != null && patch.getPlant() != null) {
+                int count = Integer.parseInt(s[1]);
+                patch.getPlant().setFruitCount(count);
+                patch.updateVarbit();
+                p.message("Set fruit count to: " + count);
+            } else {
+                p.message("No active plant found under you.");
+            }
+        });
+
+        dev("farmstate", (p, c, s) -> {
+            com.cryptic.model.content.skill.impl.farming.core.FarmingPatch patch = p.getFarmingSystem()
+                    .getPatch(p.tile(), 3);
+            if (patch != null && patch.getPlant() != null) {
+                String state = s[1].toLowerCase();
+                if (state.equals("healthy")) {
+                    patch.getPlant().setDiseased(false);
+                    patch.getPlant().setDead(false);
+                    patch.setLifecycle(com.cryptic.model.content.skill.impl.farming.core.PatchLifecycle.GROWING);
+                } else if (state.equals("diseased")) {
+                    patch.getPlant().setDiseased(true);
+                    patch.getPlant().setDead(false);
+                    patch.setLifecycle(com.cryptic.model.content.skill.impl.farming.core.PatchLifecycle.DISEASED);
+                } else if (state.equals("dead")) {
+                    patch.getPlant().setDiseased(false);
+                    patch.getPlant().setDead(true);
+                    patch.setLifecycle(com.cryptic.model.content.skill.impl.farming.core.PatchLifecycle.DEAD);
+                } else if (state.equals("stump")) {
+                    patch.setLifecycle(com.cryptic.model.content.skill.impl.farming.core.PatchLifecycle.STUMP);
+                }
+                patch.updateVarbit();
+                p.message("Set state to: " + state);
+            } else {
+                p.message("No active plant found under you.");
+            }
+        });
+
+        dev("farmcheck", (p, c, s) -> {
+            com.cryptic.model.content.skill.impl.farming.core.FarmingPatch patch = p.getFarmingSystem()
+                    .getPatch(p.tile(), 3);
+            if (patch != null && patch.getPlant() != null) {
+                patch.getPlant().setHealthChecked(!patch.getPlant().isHealthChecked());
+                patch.updateVarbit();
+                p.message("Toggled health check: " + patch.getPlant().isHealthChecked());
+            } else {
+                p.message("No active plant found under you.");
+            }
+        });
+
+        dev("testfarm", (p, c, s) -> {
+            int[] saplings = {
+                    ItemIdentifiers.APPLE_SAPLING, ItemIdentifiers.BANANA_SAPLING,
+                    ItemIdentifiers.ORANGE_SAPLING, ItemIdentifiers.CURRY_SAPLING,
+                    ItemIdentifiers.PINEAPPLE_SAPLING, ItemIdentifiers.PAPAYA_SAPLING,
+                    ItemIdentifiers.PALM_SAPLING
+            };
+            for (int sapling : saplings) {
+                p.inventory().add(sapling, 1);
+            }
+            p.inventory().add(ItemIdentifiers.SPADE, 1);
+            p.inventory().add(ItemIdentifiers.RAKE, 1);
+            p.inventory().add(ItemIdentifiers.DRAGON_AXE, 1);
+            p.teleport(new Tile(2860, 3433));
+            p.message("Teleported to Catherby Fruit Tree patch with all fruit tree saplings.");
+        });
+
         dev("tpost4", (p, c, s) ->
 
         {
             var a = new ArrayList<TradingPostListing>();
             for (int i = 0; i < 20; i++) {
-                a.add(new TradingPostListing("Test", Utils.randomElement(GameConstants.STARTER_ITEMS).createWithAmount(1).unnote(), 1000L));
+                a.add(new TradingPostListing("Test",
+                        Utils.randomElement(GameConstants.STARTER_ITEMS).createWithAmount(1).unnote(), 1000L));
             }
             TradingPost.showTradeHistory(p, a);
         });
@@ -756,7 +943,7 @@ public class CommandManager {
         {
             // Opening interface
             // interface item container id
-            // item id1,  item id2, item id3, etc.
+            // item id1, item id2, item id3, etc.
             int interfaceId = Integer.parseInt(s[0]);
             // int containerId = Integer.parseInt(s[1]);
             p.getInterfaceManager().open(interfaceId);
@@ -792,7 +979,8 @@ public class CommandManager {
 
             for (int dx = -2; dx <= 2; dx++) {
                 for (int dy = -2; dy <= 2; dy++) {
-                    if ((Math.abs(dx) == 2 || Math.abs(dy) == 2) && (dx != 2 || dy != 2) && (dx != 2 || dy != -2) && (dx != -2 || dy != 2) && (dx != -2 || dy != -2)) {
+                    if ((Math.abs(dx) == 2 || Math.abs(dy) == 2) && (dx != 2 || dy != 2) && (dx != 2 || dy != -2)
+                            && (dx != -2 || dy != 2) && (dx != -2 || dy != -2)) {
                         Tile outlineTile = new Tile(centerTile.x + dx, centerTile.y + dy, centerTile.level);
 
                         World.getWorld().tileGraphic(littleWave, outlineTile, 0, 40);
@@ -841,9 +1029,9 @@ public class CommandManager {
 
         dev("varbit", (p, c, s) -> p.varps().
 
-            varbit(Integer.parseInt(s[1]), Integer.
+                varbit(Integer.parseInt(s[1]), Integer.
 
-                parseInt(s[2])));
+                        parseInt(s[2])));
 
         dev("ht1", (p, c, s) -> CommandManager.attempt(p, "oa 8280 34570"));
 
@@ -902,7 +1090,9 @@ public class CommandManager {
                     }
                     NpcDefinition def = World.getWorld().definitions().get(NpcDefinition.class, i);
                     if (def != null && def.name != null && def.name.toLowerCase().contains(s[1])) {
-                        String result_string = "Result: " + i + " - " + def.name + " (cb " + def.combatlevel + ", alts: " + Arrays.toString(def.altForms) + ", renders: " + def.standingAnimation + ", " + def.walkingAnimation + ")";
+                        String result_string = "Result: " + i + " - " + def.name + " (cb " + def.combatlevel
+                                + ", alts: " + Arrays.toString(def.altForms) + ", renders: " + def.standingAnimation
+                                + ", " + def.walkingAnimation + ")";
                         p.message(result_string);
                         if (World.getWorld().getPlayers().size() < 10) { // Show in cmd for more results
                             System.out.println(result_string);
@@ -971,11 +1161,13 @@ public class CommandManager {
                 String[] hours = parts[1].split(",");
                 for (String hour : hours) {
                     if (hour == null || hour.length() != 5)
-                        throw new HourFormatException(format("Hour input %s is null or not five characters. Format must be 12:34", hour));
+                        throw new HourFormatException(
+                                format("Hour input %s is null or not five characters. Format must be 12:34", hour));
                     int hr = Integer.parseInt(hour.substring(0, 2));
                     int sec = Integer.parseInt(hour.substring(3, 5));
                     if (hr < 0 || sec < 0 || hr > 24 || sec > 59)
-                        throw new HourFormatException(format("Invalid range for input hour %s. Must be 00:00 - 23:59", hour));
+                        throw new HourFormatException(
+                                format("Invalid range for input hour %s. Must be 00:00 - 23:59", hour));
                 }
                 TournamentManager.setNextTorn(null); // process will re-init next one
                 TournamentManager.getSettings().setStartTimes(hours);
@@ -1020,7 +1212,7 @@ public class CommandManager {
 
         {
             var n = player.closeNpcs(5)[0];
-            //  n.queueTeleportJump(n.tile().transform(1, 1));
+            // n.queueTeleportJump(n.tile().transform(1, 1));
         });
 
         dev("t24", (player, c, parts) ->
@@ -1040,7 +1232,8 @@ public class CommandManager {
         dev("t26", (p, c, s) ->
 
         {
-            var instance = InstancedAreaManager.getSingleton().createInstancedArea(new Area(3156, 4374, 3156 + 40, 4374 + 40));
+            var instance = InstancedAreaManager.getSingleton()
+                    .createInstancedArea(new Area(3156, 4374, 3156 + 40, 4374 + 40));
             p.setInstancedArea(instance);
             p.teleport(new Tile(3166, 4384, instance.getzLevel()));
             Xarpus xarpus = new Xarpus(10767, new Tile(3169, 4386, instance.getzLevel() + 1), null);
@@ -1051,9 +1244,12 @@ public class CommandManager {
         dev("t27", (p, c, s) ->
 
         {
-            //TheatreInstance theatreInstance = new TheatreInstance(p, new TheatreArea(InstanceConfiguration.CLOSE_ON_EMPTY_NO_RESPAWN, TheatreInstance.rooms()));
+            // TheatreInstance theatreInstance = new TheatreInstance(p, new
+            // TheatreArea(InstanceConfiguration.CLOSE_ON_EMPTY_NO_RESPAWN,
+            // TheatreInstance.rooms()));
             // theatreInstance.startRaid();
-            var instance = InstancedAreaManager.getSingleton().createInstancedArea(new Area(3156, 4374, 3156 + 40, 4374 + 40));
+            var instance = InstancedAreaManager.getSingleton()
+                    .createInstancedArea(new Area(3156, 4374, 3156 + 40, 4374 + 40));
             p.setInstancedArea(instance);
             p.teleport(new Tile(3166, 4384, instance.getzLevel()));
             Xarpus xarpus = new Xarpus(10767, new Tile(3169, 4386, instance.getzLevel() + 1), null);
@@ -1111,7 +1307,8 @@ public class CommandManager {
         {
             player.tile().area(20).forEachPos(t -> {
                 var t2 = Tile.get(t, false);
-                if (t2 == null) return;
+                if (t2 == null)
+                    return;
                 if (t2.npcCount > 0)
                     t2.showTempItem(995);
             });
@@ -1142,8 +1339,10 @@ public class CommandManager {
                     if (player.getTheatreInterface().getOwner().getTheatreParty() != null) {
                         player.getTheatreInterface().getPlayers().add(member);
                         member.setTheatreParty(player.getTheatreInterface().getOwner().getTheatreParty());
-                        member.message("You've joined " + player.getTheatreInterface().getOwner().getUsername() + "'s raid party.");
-                        DialogueManager.sendStatement(player.getTheatreInterface().getOwner(), member.getUsername() + " has joined your raid party.");
+                        member.message("You've joined " + player.getTheatreInterface().getOwner().getUsername()
+                                + "'s raid party.");
+                        DialogueManager.sendStatement(player.getTheatreInterface().getOwner(),
+                                member.getUsername() + " has joined your raid party.");
                         member.getPacketSender().sendString(73055, "Leave");
                     }
                 }
@@ -1157,12 +1356,14 @@ public class CommandManager {
 
             for (var p : players) {
                 if (p.tile().region() != 14642) {
-                    p.getTheatreParty().getOwner().message(Color.RED.wrap(p.getUsername()) + " is not currently in the raiding area.");
+                    p.getTheatreParty().getOwner()
+                            .message(Color.RED.wrap(p.getUsername()) + " is not currently in the raiding area.");
                     return;
                 }
             }
 
-            //TODO possible just recycle theatre party .getOwner() instead of using player, seems safer.
+            // TODO possible just recycle theatre party .getOwner() instead of using player,
+            // seems safer.
 
             TheatreInstance theatreInstance = new TheatreInstance(player, players);
             player.setTheatreInstance(theatreInstance);
@@ -1249,14 +1450,16 @@ public class CommandManager {
             SlayerTask assignment = World.getWorld().getSlayerTasks().getCurrentAssignment(player);
             int amt = assignment.getRemainingTaskAmount(player) + 1;
             for (int i = 0; i < amt; i++) {
-                World.getWorld().getSlayerTasks().handleSlayerDeath(player, new NPC(assignment.getNpcs()[0], player.tile()));
+                World.getWorld().getSlayerTasks().handleSlayerDeath(player,
+                        new NPC(assignment.getNpcs()[0], player.tile()));
             }
         });
 
         dev("pint", (player, c, s) ->
 
         {
-            player.getPacketSender().sendParallelInterfaceVisibility(Integer.parseInt(s[1]), Boolean.parseBoolean(s[2]));
+            player.getPacketSender().sendParallelInterfaceVisibility(Integer.parseInt(s[1]),
+                    Boolean.parseBoolean(s[2]));
         });
     }
 
@@ -1280,7 +1483,8 @@ public class CommandManager {
             super(cause);
         }
 
-        protected HourFormatException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+        protected HourFormatException(String message, Throwable cause, boolean enableSuppression,
+                boolean writableStackTrace) {
             super(message, cause, enableSuppression, writableStackTrace);
         }
 
@@ -1306,20 +1510,21 @@ public class CommandManager {
 
             @Override
             public boolean canUse(Player player) {
-                return player.getPlayerRights().isCommunityManager(player);
+                return player.getPlayerRights().isModerator(player);
             }
         });
     }
 
     public static void attempt(Player player, String command) {
         String[] parts = command.split(" ");
-        if (parts.length == 0) // doing ::  with some spaces lol
+        if (parts.length == 0) // doing :: with some spaces lol
             return;
         parts[0] = parts[0].toLowerCase();
-        attempt(player, command, parts);
+        attempt(player, parts[0], parts); // FIX: Pass parts[0] instead of full command
     }
 
     public static void attempt(Player player, String command, String[] parts) {
+        System.out.println("[DEBUG] Command attempt: " + command + " for " + player.getUsername());
         Command c = CommandManager.commands.get(parts[0]);
         if (c != null) {
             if (c.canUse(player)) {
@@ -1328,9 +1533,10 @@ public class CommandManager {
                     commandLogs.log(COMMAND, "{} used command ::{}", player.getUsername(), command);
                     Utils.sendDiscordInfoLog(player.getUsername() + " used command: ::" + command, "command");
                 } catch (Exception e) {
-                    player.message("Something went wrong with the command ::" + command + ". Perhaps you entered it wrong?");
+                    player.message(
+                            "Something went wrong with the command ::" + command + ". Perhaps you entered it wrong?");
                     player.debug("Error %s", e);
-                    //throw e;
+                    // throw e;
                     logger.error("cmd ex", e);
                 }
             } else {
@@ -1348,7 +1554,8 @@ public class CommandManager {
         }
         if (c == null && !basicCommands(player, command, parts)) {
             commandLogs.log(COMMAND, player.getUsername() + " tried to use non-existent command ::" + command);
-            Utils.sendDiscordInfoLog(player.getUsername() + " tried to use non-existent command ::" + command, "command");
+            Utils.sendDiscordInfoLog(player.getUsername() + " tried to use non-existent command ::" + command,
+                    "command");
             player.message("Invalid command.");
         }
     }
@@ -1356,8 +1563,8 @@ public class CommandManager {
     private static boolean basicCommands(Player player, String command, String[] parts) {
 
         switch (command) {
-            //13 = bubble
-            //84 = str icon
+            // 13 = bubble
+            // 84 = str icon
             //
 
             case "icons": {

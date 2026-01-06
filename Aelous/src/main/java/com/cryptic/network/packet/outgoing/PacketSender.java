@@ -19,6 +19,8 @@ import com.cryptic.model.map.region.RegionManager;
 import com.cryptic.network.packet.*;
 import com.cryptic.network.packet.outgoing.message.ComponentVisibility;
 import lombok.Getter;
+import com.cryptic.GameServer;
+import com.cryptic.cache.definitions.VarbitDefinition;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -30,7 +32,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * This class manages making the packets that will be sent (when called upon) onto
+ * This class manages making the packets that will be sent (when called upon)
+ * onto
  * the associated player's client.
  * <p>
  * This class is used for S2C (Server to Client) packets.
@@ -57,15 +60,16 @@ public final class PacketSender {
         if (player != null) {
             if (visible) {
                 if (walkableInterfaceList.contains(interfaceId)) {
-                    player.debug("skip sending walkable, already open "+interfaceId);
+                    player.debug("skip sending walkable, already open " + interfaceId);
                 } else {
                     walkableInterfaceList.add(interfaceId);
                 }
             } else {
                 if (!walkableInterfaceList.contains(interfaceId)) {
-                    player.debug("skip sending walkable, not open "+interfaceId);
+                    player.debug("skip sending walkable, not open " + interfaceId);
                 }
-                walkableInterfaceList.remove((Object)interfaceId); // MUSt BE OBJECT casted otherwise it'll try removing as index
+                walkableInterfaceList.remove((Object) interfaceId); // MUSt BE OBJECT casted otherwise it'll try
+                                                                    // removing as index
             }
             out.putInt(interfaceId);
             out.put(visible ? 1 : 0);
@@ -128,9 +132,12 @@ public final class PacketSender {
      *
      * @param text    the text that will be displayed in the center of the screen
      * @param state   the state should be either 0, -1, or 1.
-     * @param seconds the amount of time in seconds it takes for the fade to transition.
+     * @param seconds the amount of time in seconds it takes for the fade to
+     *                transition.
      *                <p>
-     *                If the state is -1 then the screen fades from black to transparent. When the state is +1 the screen fades from transparent to black. If the state is 0 all drawing
+     *                If the state is -1 then the screen fades from black to
+     *                transparent. When the state is +1 the screen fades from
+     *                transparent to black. If the state is 0 all drawing
      *                is stopped.
      */
     public PacketSender sendScreenFade(String text, int state, int seconds) {
@@ -185,7 +192,6 @@ public final class PacketSender {
         return this;
     }
 
-
     public PacketSender setClickedText(int interfaceId, boolean state) {
         PacketBuilder out = new PacketBuilder(239);
         out.put(state ? 1 : 0);
@@ -230,7 +236,7 @@ public final class PacketSender {
         PacketBuilder out = new PacketBuilder(66, PacketType.VARIABLE_SHORT);
         out.put(1);
         out.put(0);
-        out.putShort(5);//0 for a set name
+        out.putShort(5);// 0 for a set name
         out.putString("");
         System.err.println("clearing favorites...???");
         player.getSession().write(out);
@@ -250,23 +256,23 @@ public final class PacketSender {
     public PacketSender addTPHistory(TeleportData data, boolean favorite) {
         PacketBuilder out = new PacketBuilder(66, PacketType.VARIABLE_SHORT);
         out.put(favorite ? 1 : 0)
-            .put(0)
-            .putShort(data.spriteID)
-            .putString(data.teleportName);
+                .put(0)
+                .putShort(data.spriteID)
+                .putString(data.teleportName);
         player.getSession().write(out);
         return this;
     }
 
     public PacketSender resetRecentTeleports() {
         PacketBuilder out = new PacketBuilder(66, PacketType.VARIABLE_SHORT)
-            .put(0).put(1).putShort(0).putString("N/A");
+                .put(0).put(1).putShort(0).putString("N/A");
         player.getSession().write(out);
         return this;
     }
 
     public PacketSender removeFavorite(TeleportData data) {
         PacketBuilder out = new PacketBuilder(66, PacketType.VARIABLE_SHORT)
-            .put(1).put(1).putShort(data.spriteID).putString(data.teleportName);
+                .put(1).put(1).putShort(data.spriteID).putString(data.teleportName);
         player.getSession().write(out);
         return this;
     }
@@ -348,7 +354,8 @@ public final class PacketSender {
         PacketBuilder out = new PacketBuilder(73);
         out.putShort(player.tile().getRegionX() + 6, ValueType.A);
         out.putShort(player.tile().getRegionY() + 6);
-        if (!player.getRegions().contains(player.tile().getRegion())) player.addRegion(player.tile().getRegion());
+        if (!player.getRegions().contains(player.tile().getRegion()))
+            player.addRegion(player.tile().getRegion());
         player.getSession().write(out);
         return this;
     }
@@ -365,7 +372,8 @@ public final class PacketSender {
     }
 
     /**
-     * Sets the world's system update time, once timer is 0, everyone will be disconnected.
+     * Sets the world's system update time, once timer is 0, everyone will be
+     * disconnected.
      *
      * @param time The amount of seconds in which world will be updated in.
      * @return The PacketSender instance.
@@ -467,13 +475,32 @@ public final class PacketSender {
      */
     public PacketSender sendConfig(int id, int state) {
         player.sessionVarps()[id] = state;
-        if (state > Byte.MAX_VALUE) {
+        if (state > Byte.MAX_VALUE || state < Byte.MIN_VALUE) {
             return sendVarpIntSize(id, state);
         }
         PacketBuilder out = new PacketBuilder(36);
         out.putShort(id, ByteOrder.LITTLE);
         out.put(state); // value is over byte lol
         player.getSession().write(out);
+        return this;
+    }
+
+    /**
+     * Sends a Varbit state by encoding it into the associated Varp.
+     *
+     * @param id    The varbit ID.
+     * @param state The value to set the varbit to.
+     * @return The PacketSender instance.
+     */
+    public PacketSender sendVarbit(int id, int state) {
+        VarbitDefinition def = GameServer.definitions().get(VarbitDefinition.class, id);
+        if (def != null) {
+            int varpId = def.varp;
+            int currentValue = player.sessionVarps()[varpId];
+            int mask = (1 << (def.endbit - def.startbit + 1)) - 1;
+            int newValue = (currentValue & ~(mask << def.startbit)) | ((state & mask) << def.startbit);
+            return sendConfig(varpId, newValue);
+        }
         return this;
     }
 
@@ -494,7 +521,8 @@ public final class PacketSender {
     }
 
     /**
-     * Sends the state in which the player has their chat options, such as public, private, friends only.
+     * Sends the state in which the player has their chat options, such as public,
+     * private, friends only.
      *
      * @param publicChat  The state of their public chat.
      * @param privateChat The state of their private chat.
@@ -545,7 +573,7 @@ public final class PacketSender {
     }
 
     public PacketSender sendInterface(int id) {
-        //System.out.println("sending interface");
+        // System.out.println("sending interface");
         PacketBuilder out = new PacketBuilder(97);
         out.putInt(id);
         player.getSession().write(out);
@@ -568,6 +596,7 @@ public final class PacketSender {
         }
         return this;
     }
+
     public PacketSender setInterClickable(int interfaceId, boolean clickable) {
         PacketBuilder out = new PacketBuilder(2);
         out.putInt(interfaceId);
@@ -617,7 +646,7 @@ public final class PacketSender {
     public PacketSender sendInterfaceComponentMoval(int x, int y, int id) {
         PacketBuilder out = new PacketBuilder(70);
         out.putShort(x).putShort(y).putInt(id);
-        //System.out.println("x "+ x +" y "+ y +" id "+id);
+        // System.out.println("x "+ x +" y "+ y +" id "+id);
         player.getSession().write(out);
         return this;
     }
@@ -684,7 +713,8 @@ public final class PacketSender {
                 } else if (id == 839) {
                     updateTab(3, 0);
                 } else {
-                    logger.error("For some reason, the spellbook interface ID for " + player.getUsername() + " is " + id);
+                    logger.error(
+                            "For some reason, the spellbook interface ID for " + player.getUsername() + " is " + id);
                 }
             }
             player.getInterfaceManager().setSidebar(tab, id);
@@ -728,8 +758,8 @@ public final class PacketSender {
     }
 
     public PacketSender sendInterfaceRemoval() {
-        //System.out.println("sending interface removal");
-        //System.out.println("Send interface removal " + Misc.getStackTrace());
+        // System.out.println("sending interface removal");
+        // System.out.println("Send interface removal " + Misc.getStackTrace());
         player.getSession().write(new PacketBuilder(219));
         return this;
     }
@@ -875,7 +905,6 @@ public final class PacketSender {
         return this;
     }
 
-
     public PacketSender sendInteractionOption(String option, int slot, boolean top) {
         PacketBuilder out = new PacketBuilder(104, PacketType.VARIABLE);
         out.put(slot, ValueType.C);
@@ -909,12 +938,13 @@ public final class PacketSender {
         player.getSession().write(out);
     }
 
-    public PacketSender sendString(int id, String string) { //i dont use that client.java its a deob that patrick had in the valinor clietn at one point kk what one
+    public PacketSender sendString(int id, String string) { // i dont use that client.java its a deob that patrick had
+                                                            // in the valinor clietn at one point kk what one
         PacketBuilder out = new PacketBuilder(126, PacketType.VARIABLE_SHORT);
         out.putString(string);
         out.putInt(id);
         player.getSession().write(out);
-        //System.out.println("Id being updated: "+id+" vs text: "+string);
+        // System.out.println("Id being updated: "+id+" vs text: "+string);
         return this;
     }
 
@@ -922,7 +952,7 @@ public final class PacketSender {
         PacketBuilder out = new PacketBuilder(122);
         out.putShort(id);
         out.putInt(color);
-        //System.out.printf("id: %d colour: %d%n", id, color);
+        // System.out.printf("id: %d colour: %d%n", id, color);
         player.getSession().write(out);
         return this;
     }
@@ -945,11 +975,13 @@ public final class PacketSender {
      * Sends a hint to specified position.
      *
      * @param tile         The position to create the hint.
-     * @param tilePosition The position on the square (middle = 2; west = 3; east = 4; south = 5; north = 6)
+     * @param tilePosition The position on the square (middle = 2; west = 3; east =
+     *                     4; south = 5; north = 6)
      * @return The Packet Sender instance.
      */
     public PacketSender sendPositionalHint(Tile tile, int tilePosition) {
-        if (tile == null) return this;
+        if (tile == null)
+            return this;
         PacketBuilder out = new PacketBuilder(254);
         out.put(tilePosition);
         out.putShort(tile.getX());
@@ -1004,7 +1036,8 @@ public final class PacketSender {
         return this;
     }
 
-    public PacketSender sendPrivateMessage(int senderRights, int senderMemberRights, int senderIronmanRights, Player target, byte[] message, int size) {
+    public PacketSender sendPrivateMessage(int senderRights, int senderMemberRights, int senderIronmanRights,
+            Player target, byte[] message, int size) {
         PacketBuilder out = new PacketBuilder(196, PacketType.VARIABLE_SHORT);
         out.putString(target.getUsername());
         out.putInt(target.getRelations().getPrivateMessageId());
@@ -1084,18 +1117,20 @@ public final class PacketSender {
 
     public PacketSender sendObject(GameObject object) {
         sendMapPacket(object.getX(), object.getY(), object.getZ());
-        //sendPosition(new Tile(x, y, z));
+        // sendPosition(new Tile(x, y, z));
         PacketBuilder out = new PacketBuilder(151);
         out.put(0, ValueType.A);
         out.putShort(object.getId(), ByteOrder.LITTLE);
         out.put((object.getType() << 2) + (object.getRotation() & 3), ValueType.S);
         player.getSession().write(out);
         if (object.isCustom()) {
-           /* System.out.println("create %s %s %s %s og=%s".formatted(
-                    object.getId() == -1 ? "removed" : ObjectDefinition.get(object.getId()).name,
-                    object.getX(), object.getY(), object.getZ(),
-                    object.originalId)
-            );*/
+            /*
+             * System.out.println("create %s %s %s %s og=%s".formatted(
+             * object.getId() == -1 ? "removed" : ObjectDefinition.get(object.getId()).name,
+             * object.getX(), object.getY(), object.getZ(),
+             * object.originalId)
+             * );
+             */
         }
         return this;
     }
@@ -1104,10 +1139,13 @@ public final class PacketSender {
         sendMapPacket(object.getX(), object.getY(), object.getZ());
         PacketBuilder out = new PacketBuilder(101);
         out.put((object.getType() << 2) + (object.getRotation() & 3), ValueType.C);
-        //System.out.println("Sending value" + (((object.getX() & 0x7) << 4) | (object.getY() & 0x7)));
-        out.put(0); //Don't send offset, we don't actually use it client-side cause we sendPosition first.
+        // System.out.println("Sending value" + (((object.getX() & 0x7) << 4) |
+        // (object.getY() & 0x7)));
+        out.put(0); // Don't send offset, we don't actually use it client-side cause we sendPosition
+                    // first.
         player.getSession().write(out);
-        //System.out.println("Sending object removal packet. For object: "+object.toString());
+        // System.out.println("Sending object removal packet. For object:
+        // "+object.toString());
         return this;
     }
 
@@ -1125,8 +1163,10 @@ public final class PacketSender {
         sendMapPacket(groundItem.getTile().x, groundItem.getTile().y, groundItem.getTile().level);
         PacketBuilder out = new PacketBuilder(44);
         out.putShort(groundItem.getItem().getId(), ValueType.A, ByteOrder.LITTLE);
-        //ken comment, also changed this in Client.java opcode == IncomingHandler.CREATE_GROUND_ITEMS to allow for interfaces greater than 80000.
-        //out.putShort(groundItem.getItem().getAmount());
+        // ken comment, also changed this in Client.java opcode ==
+        // IncomingHandler.CREATE_GROUND_ITEMS to allow for interfaces greater than
+        // 80000.
+        // out.putShort(groundItem.getItem().getAmount());
         out.putInt(groundItem.getItem().getAmount());
         out.putShort(0);
         player.getSession().write(out);
@@ -1176,7 +1216,8 @@ public final class PacketSender {
 
     public PacketSender sendPosition(final Tile tile) {
         PacketBuilder out = new PacketBuilder(85);
-        if (player.getZ() != tile.getZ()) return null;
+        if (player.getZ() != tile.getZ())
+            return null;
         final Tile other = player.getLastKnownRegion();
         var playerLocalX = tile.getX() - 8 * other.getRegionX();
         var playerLocalY = tile.getY() - 8 * other.getRegionY();
@@ -1195,7 +1236,8 @@ public final class PacketSender {
     private final Player player;
 
     private PacketSender sendMapPacket(int x, int y, int z) {
-        if (player.getZ() != z) return null;
+        if (player.getZ() != z)
+            return null;
         final Tile other = player.getLastKnownRegion();
         int playerLocalX = x - 8 * other.getRegionX();
         int playerLocalY = y - 8 * other.getRegionY();
@@ -1203,9 +1245,14 @@ public final class PacketSender {
         return this;
     }
 
-    public PacketSender sendProjectile(int startX, int startY, int destX, int destY, int angle, int duration, int gfxMoving, int startHeight, int endHeight, int lockon, int startDelay, int slope, int creatorSize, int startDistanceOffset) {
+    public PacketSender sendProjectile(int startX, int startY, int destX, int destY, int angle, int duration,
+            int gfxMoving, int startHeight, int endHeight, int lockon, int startDelay, int slope, int creatorSize,
+            int startDistanceOffset) {
         sendMapPacket(startX, startY, player.getZ());
-        player.getSession().write(new PacketBuilder(117).put(angle).put(destY).put(destX).putShort(lockon).putShort(gfxMoving).put(startHeight).put(endHeight).putShort(startDelay).putShort(duration).put(slope).put(startDistanceOffset));
+        player.getSession()
+                .write(new PacketBuilder(117).put(angle).put(destY).put(destX).putShort(lockon).putShort(gfxMoving)
+                        .put(startHeight).put(endHeight).putShort(startDelay).putShort(duration).put(slope)
+                        .put(startDistanceOffset));
         return this;
     }
 
@@ -1222,7 +1269,17 @@ public final class PacketSender {
      * @param childId        The childId of the interface.
      * @param scrollPosition The value of the scroll position.
      */
-    public PacketSender setScrollPosition(final int childId, final int scrollPosition, final int scrollMax) { // ok wew s2c verified .. guess what now yep the other damn side
+    public PacketSender setScrollPosition(final int childId, final int scrollPosition, final int scrollMax) { // ok wew
+                                                                                                              // s2c
+                                                                                                              // verified
+                                                                                                              // ..
+                                                                                                              // guess
+                                                                                                              // what
+                                                                                                              // now yep
+                                                                                                              // the
+                                                                                                              // other
+                                                                                                              // damn
+                                                                                                              // side
         PacketBuilder out = new PacketBuilder(79);
         out.putShort(childId);
         out.putShort(scrollPosition);

@@ -183,4 +183,6 @@ public final class ClientConstants {
     public final static int SCROLL = 4;
     public final static int SLIDE = 5;
 
+    public static final int FRUIT_TREE_STATE_VARP = 1100;
+
 }

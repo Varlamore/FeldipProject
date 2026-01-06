@@ -20,7 +20,8 @@ public enum FarmingPlant {
     CURRY(ItemIdentifiers.CURRY_SAPLING, new CurryTree()),
     PINEAPPLE(ItemIdentifiers.PINEAPPLE_SAPLING, new PineappleTree()),
     PAPAYA(ItemIdentifiers.PAPAYA_SAPLING, new PapayaTree()),
-    PALM(ItemIdentifiers.PALM_SAPLING, new PalmTree());
+    PALM(ItemIdentifiers.PALM_SAPLING, new PalmTree()),
+    DRAGONFRUIT(ItemIdentifiers.DRAGONFRUIT_SAPLING, new DragonfruitTree());
 
     private final int seedId;
     private final PlantType plantType;

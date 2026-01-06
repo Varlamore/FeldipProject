@@ -66,7 +66,8 @@ public class RouteFinder {
 
     /***
      *
-     * PERFORMANCE ISSUE LIES HERE IN THE ROUTE METHOD FOR NPCS THEY SHOULD BE USING DUMBROUTE NOT SMART
+     * PERFORMANCE ISSUE LIES HERE IN THE ROUTE METHOD FOR NPCS THEY SHOULD BE USING
+     * DUMBROUTE NOT SMART
      *
      *
      * @param route
@@ -81,7 +82,8 @@ public class RouteFinder {
         clipUtils.update(baseX, baseY, position.getZ());
         MovementQueue movement = entity.getMovement();
         movement.readOffset = 0;
-        movement.writeOffset = findRoute(position.getBaseLocalX(), position.getBaseLocalY(), entity.getSize(), route, clipUtils, true, movement.getStepsX(), movement.getStepsY());
+        movement.writeOffset = findRoute(position.getBaseLocalX(), position.getBaseLocalY(), entity.getSize(), route,
+                clipUtils, true, movement.getStepsX(), movement.getStepsY());
         movement.stepType = MovementQueue.StepType.REGULAR;
         if (movement.writeOffset == -1) {
             route.finishX = -1;
@@ -107,7 +109,8 @@ public class RouteFinder {
     }
 
     public RouteType routeAbsolute(int destX, int destY, boolean message) {
-        if (routeAbsolute == null) routeAbsolute = new RouteAbsolute();
+        if (routeAbsolute == null)
+            routeAbsolute = new RouteAbsolute();
         routeAbsolute.set(destX, destY);
         route(routeAbsolute, message, false);
         return routeAbsolute;
@@ -119,7 +122,8 @@ public class RouteFinder {
     private RouteRelative routeRelative;
 
     public RouteType routeRelative(int destX, int destY) {
-        if (routeRelative == null) routeRelative = new RouteRelative();
+        if (routeRelative == null)
+            routeRelative = new RouteRelative();
         routeRelative.set(destX, destY, entity.getSize(), entity.getSize(), 0);
         route(routeRelative, true, false);
         return routeRelative;
@@ -133,34 +137,36 @@ public class RouteFinder {
         // todo nick: - make this use route relavite when the obj is on something !
         // RouteType route = routeRelative(groundItem.x, groundItem.y); // nick
         Chain.bound(entity)
-            .repeatingTask(
-                1,
-                t -> { // problem is this isnt a chain, oops
-                    if (!entity.getMovement().isAtDestination()
-                        || !route.finished(entity.tile())) return;
-                    if (route.reachable) {
-                        successConsumer.accept(0);
-                        t.stop();
-                        return;
-                    }
-                    Tile pos = entity.tile();
-                    int diffX = pos.getX() - groundItem.getTile().x;
-                    int diffY = pos.getY() - groundItem.getTile().y;
-                    int mask = getDirectionMask(diffX, diffY);
-                    if (mask != 0) {
-                       // Tile tile = new Tile(pos.getX(), pos.getY(), pos.getZ());
-                        Tile tile = Tile.get(pos.getX(), pos.getY(), pos.getZ());
-                        if (tile == null || tile.allowEntrance(mask)) {
-                            entity.setPositionToFace(groundItem.getTile());
-                            entity.runFn(1, () -> successConsumer.accept(1));
+                .repeatingTask(
+                        1,
+                        t -> { // problem is this isnt a chain, oops
+                            if (!entity.getMovement().isAtDestination()
+                                    || !route.finished(entity.tile()))
+                                return;
+                            if (route.reachable) {
+                                successConsumer.accept(0);
+                                t.stop();
+                                return;
+                            }
+                            Tile pos = entity.tile();
+                            int diffX = pos.getX() - groundItem.getTile().x;
+                            int diffY = pos.getY() - groundItem.getTile().y;
+                            int mask = getDirectionMask(diffX, diffY);
+                            if (mask != 0) {
+                                // Tile tile = new Tile(pos.getX(), pos.getY(), pos.getZ());
+                                Tile tile = Tile.get(pos.getX(), pos.getY(), pos.getZ());
+                                if (tile == null || tile.allowEntrance(mask)) {
+                                    entity.setPositionToFace(groundItem.getTile());
+                                    entity.runFn(1, () -> successConsumer.accept(1));
+                                    t.stop();
+                                    return;
+                                }
+                            }
+                            // didnt return succesfully above, continue to failure
+                            if (entity.isPlayer())
+                                entity.getAsPlayer().getMovement().outOfReach();
                             t.stop();
-                            return;
-                        }
-                    }
-                    // didnt return succesfully above, continue to failure
-                    if (entity.isPlayer()) entity.getAsPlayer().getMovement().outOfReach();
-                    t.stop();
-                });
+                        });
     }
 
     /**
@@ -169,12 +175,13 @@ public class RouteFinder {
     private RouteObject routeObject;
 
     public RouteObject routeObject(GameObject gameObject) {
-        if (routeObject == null) routeObject = new RouteObject();
+        if (routeObject == null)
+            routeObject = new RouteObject();
         ObjectDefinition definition = gameObject.definition();
         // osrs format
         if (gameObject.getType() == 10
-            || gameObject.getType() == 11
-            || gameObject.getType() == 22) {
+                || gameObject.getType() == 11
+                || gameObject.getType() == 22) {
             int xLength, yLength;
             if (gameObject.getRotation() == 0 || gameObject.getRotation() == 2) {
                 xLength = definition.sizeX; // opcode 14
@@ -185,36 +192,35 @@ public class RouteFinder {
             }
             int someDirection = gameObject.definition().cflag; // opcode 69
             if (gameObject.getRotation() != 0)
-                someDirection =
-                    (0xf & someDirection << gameObject.getRotation())
+                someDirection = (0xf & someDirection << gameObject.getRotation())
                         + (someDirection >> -gameObject.getRotation() + 4);
             routeObject.set(
-                gameObject.tile().x,
-                gameObject.tile().y,
-                xLength,
-                yLength,
-                ObjectType.values()[gameObject.getType()],
-                gameObject.getRotation(),
-                someDirection);
+                    gameObject.tile().x,
+                    gameObject.tile().y,
+                    xLength,
+                    yLength,
+                    ObjectType.values()[gameObject.getType()],
+                    gameObject.getRotation(),
+                    someDirection);
         } else if (gameObject.getType() >= 0 && gameObject.getType() <= 3
-            || gameObject.getType() == 9) {
+                || gameObject.getType() == 9) {
             routeObject.set(
-                gameObject.tile().x,
-                gameObject.tile().y,
-                0,
-                0,
-                ObjectType.values()[gameObject.getType()],
-                gameObject.getRotation(),
-                null);
+                    gameObject.tile().x,
+                    gameObject.tile().y,
+                    0,
+                    0,
+                    ObjectType.values()[gameObject.getType()],
+                    gameObject.getRotation(),
+                    null);
         } else {
             routeObject.set(
-                gameObject.tile().x,
-                gameObject.tile().y,
-                0,
-                0,
-                ObjectType.values()[gameObject.getType()],
-                gameObject.getRotation(),
-                null);
+                    gameObject.tile().x,
+                    gameObject.tile().y,
+                    0,
+                    0,
+                    ObjectType.values()[gameObject.getType()],
+                    gameObject.getRotation(),
+                    null);
         }
         route(routeObject, false, false);
         return routeObject;
@@ -225,30 +231,37 @@ public class RouteFinder {
     }
 
     public static boolean isRemoteObject(GameObject object) {
-        //Rogues den basement door.
+        // Rogues den basement door.
         if (object.getId() == DOOR_7259 && object.getX() == 3061 && object.getY() == 4984 && object.getHeight() == 1) {
             return true;
         }
-        //Rogues den basement passageway.
-        if (object.getId() == PASSAGEWAY_7258 && object.getX() == 3061 && object.getY() == 4986 && object.getHeight() == 1) {
+        // Rogues den basement passageway.
+        if (object.getId() == PASSAGEWAY_7258 && object.getX() == 3061 && object.getY() == 4986
+                && object.getHeight() == 1) {
             return true;
         }
-        if (object.getId() == PILLAR_31561 && object.getX() == 2356 && object.getY() == 9841) { // "jump-to" pillar in member caves
+        if (object.getId() == PILLAR_31561 && object.getX() == 2356 && object.getY() == 9841) { // "jump-to" pillar in
+                                                                                                // member caves
             return true;
         }
-        if (object.getId() == PILLAR_31561 && object.getX() == 3202 && object.getY() == 10196) { // "jump-to" pillar in rev caves
+        if (object.getId() == PILLAR_31561 && object.getX() == 3202 && object.getY() == 10196) { // "jump-to" pillar in
+                                                                                                 // rev caves
             return true;
         }
-        if (object.getId() == PILLAR_31561 && object.getX() == 3180 && object.getY() == 10209) { // "jump-to" pillar in rev caves
+        if (object.getId() == PILLAR_31561 && object.getX() == 3180 && object.getY() == 10209) { // "jump-to" pillar in
+                                                                                                 // rev caves
             return true;
         }
-        if (object.getId() == PILLAR_31561 && object.getX() == 3241 && object.getY() == 10145) { // "jump-to" pillar in rev caves
+        if (object.getId() == PILLAR_31561 && object.getX() == 3241 && object.getY() == 10145) { // "jump-to" pillar in
+                                                                                                 // rev caves
             return true;
         }
-        if (object.getId() == PILLAR_31561 && object.getX() == 3200 && object.getY() == 10136) { // "jump-to" pillar in rev caves
+        if (object.getId() == PILLAR_31561 && object.getX() == 3200 && object.getY() == 10136) { // "jump-to" pillar in
+                                                                                                 // rev caves
             return true;
         }
-        if (object.getId() == PILLAR_31561 && object.getX() == 3220 && object.getY() == 10086) { // "jump-to" pillar in rev caves
+        if (object.getId() == PILLAR_31561 && object.getX() == 3220 && object.getY() == 10086) { // "jump-to" pillar in
+                                                                                                 // rev caves
             return true;
         }
         if (object.getId() == GAP_14930) // seer's rooftop gap
@@ -262,9 +275,17 @@ public class RouteFinder {
             return true;
         if (object.getId() == DOOR_136 && object.tile().equals(3141, 4557))
             return true;
-        // yes they are remote. trigger instantly and handle PF walkto code inside the handler code
+        // yes they are remote. trigger instantly and handle PF walkto code inside the
+        // handler code
         return switch (object.getId()) {
-            case LAVA_GAP, STEPS_30189, STEPS_30190, PIPE_21728, STEPPING_STONE_23556, OBSTACLE_PIPE_16509, ROPESWING_23132, GAP_14947, STEPPING_STONE_19040, CABLE, TROPICAL_TREE_14404, LEDGE_14920, NARROW_WALL, LEDGE_14836, EDGE, GAP_14990, GAP_14991, SARCOPHAGUS_20722, STAIRCASE_20670, HAND_HOLDS_14901, GAP_14903, TIGHTROPE_14992, SARCOPHAGUS_20771, GAP_11631, CRATE_11632, ROPE_LADDER_28858, STAIRCASE_20668, WALL_14832, GAP_14835, PILE_OF_FISH, ZIP_LINE_14403, STAIRCASE_20667, REDWOOD, REDWOOD_29670, WALL_11630, GAP_14848, GAP_14846, POLEVAULT, GAP_14847, GAP_14897, TREASURE_ROOM -> true;
+            case LAVA_GAP, STEPS_30189, STEPS_30190, PIPE_21728, STEPPING_STONE_23556, OBSTACLE_PIPE_16509,
+                    ROPESWING_23132, GAP_14947, STEPPING_STONE_19040, CABLE, TROPICAL_TREE_14404, LEDGE_14920,
+                    NARROW_WALL, LEDGE_14836, EDGE, GAP_14990, GAP_14991, SARCOPHAGUS_20722, STAIRCASE_20670,
+                    HAND_HOLDS_14901, GAP_14903, TIGHTROPE_14992, SARCOPHAGUS_20771, GAP_11631, CRATE_11632,
+                    ROPE_LADDER_28858, STAIRCASE_20668, WALL_14832, GAP_14835, PILE_OF_FISH, ZIP_LINE_14403,
+                    STAIRCASE_20667, REDWOOD, REDWOOD_29670, WALL_11630, GAP_14848, GAP_14846, POLEVAULT, GAP_14847,
+                    GAP_14897, TREASURE_ROOM ->
+                true;
             default -> false;
         };
     }
@@ -277,7 +298,8 @@ public class RouteFinder {
         RouteType route;
         if (gameObject.walkTo != null)
             route = routeAbsolute(gameObject.walkTo.getX(), gameObject.walkTo.getY());
-        else route = routeObject(gameObject);
+        else
+            route = routeObject(gameObject);
         /** No event required, already at destination. */
         final boolean isInstantTriggerRemoteObj = checkRemote && isRemoteObject(gameObject);
         final boolean skippath = checkRemote && isRemoteObjectSkipPath(gameObject);
@@ -286,54 +308,65 @@ public class RouteFinder {
             return;
         }
         if (route.finished(entity.tile())) {
-            //entity.setPositionToFace(gameObject.tile());
+            // Face the center of the object, not the southwest corner
+            ObjectDefinition def = gameObject.definition();
+            if (def != null) {
+                int centerX = gameObject.tile().x + (def.sizeX / 2);
+                int centerY = gameObject.tile().y + (def.sizeY / 2);
+                entity.setPositionToFace(new Tile(centerX, centerY, gameObject.tile().level));
+            } else {
+                entity.setPositionToFace(gameObject.tile());
+            }
             if (route.reachable) {
                 successAction.run();
                 return;
             }
-            if (gameObject.skipReachCheck != null && gameObject.skipReachCheck.test(entity.tile()) || isInstantTriggerRemoteObj) {
+            if (gameObject.skipReachCheck != null && gameObject.skipReachCheck.test(entity.tile())
+                    || isInstantTriggerRemoteObj) {
                 successAction.run();
                 return;
             }
-            if (entity.isPlayer()) entity.getAsPlayer().getMovement().outOfReach();
+            if (entity.isPlayer())
+                entity.getAsPlayer().getMovement().outOfReach();
             return;
         }
         /** Event required, not yet at destination. */
         int id = gameObject.getId();
         Chain.bound(entity)
-            .repeatingTask(
-                1,
-                event -> {
-                    if (!entity.getMovement().isAtDestination()) {
-                        if (gameObject.getId() != id || gameObject.tile() == null) {
-                            entity.getMovement().reset();
+                .repeatingTask(
+                        1,
+                        event -> {
+                            if (!entity.getMovement().isAtDestination()) {
+                                if (gameObject.getId() != id || gameObject.tile() == null) {
+                                    entity.getMovement().reset();
+                                    event.stop();
+                                    return;
+                                }
+                                return;
+                            }
+                            if (gameObject.getId() != id || gameObject.tile() == null) {
+                                /* obj was changed or removed */
+                                event.stop();
+                                return;
+                            }
+                            if (route.reachable) {
+                                if (route.finished(entity.tile())) {
+                                    successAction.run();
+                                    event.stop();
+                                    return;
+                                }
+                            }
+                            if (gameObject.skipReachCheck != null
+                                    && gameObject.skipReachCheck.test(entity.tile())
+                                    || isInstantTriggerRemoteObj) {
+                                successAction.run();
+                                event.stop();
+                                return;
+                            }
+                            if (entity.isPlayer())
+                                entity.getAsPlayer().getMovement().outOfReach();
                             event.stop();
-                            return;
-                        }
-                        return;
-                    }
-                    if (gameObject.getId() != id || gameObject.tile() == null) {
-                        /* obj was changed or removed */
-                        event.stop();
-                        return;
-                    }
-                    if (route.reachable) {
-                        if (route.finished(entity.tile())) {
-                            successAction.run();
-                            event.stop();
-                            return;
-                        }
-                    }
-                    if (gameObject.skipReachCheck != null
-                        && gameObject.skipReachCheck.test(entity.tile())
-                        || isInstantTriggerRemoteObj) {
-                        successAction.run();
-                        event.stop();
-                        return;
-                    }
-                    if (entity.isPlayer()) entity.getAsPlayer().getMovement().outOfReach();
-                    event.stop();
-                });
+                        });
     }
 
     /**
@@ -379,20 +412,22 @@ public class RouteFinder {
     /**
      * Step check
      */
-    public boolean allowStep(int stepX, int stepY) { //issue here for verzik pathing
+    public boolean allowStep(int stepX, int stepY) { // issue here for verzik pathing
         if (targetRoute != null && !targetRoute.allowStep(entity, stepX, stepY)) {
             entity.getMovement().reset();
             return false;
         }
         if (entity.getMovement().stepType == MovementQueue.StepType.REGULAR) {
-            if (!entity.getMovement().canMove(!entity.isNpc() && entity.getAsPlayer().getMovementQueue().movementPacketThisCycle())) {
+            if (!entity.getMovement()
+                    .canMove(!entity.isNpc() && entity.getAsPlayer().getMovementQueue().movementPacketThisCycle())) {
                 return false;
             }
             if (entity.isNpc() && !entity.getAsNpc().ignoreOccupiedTiles && Tile.isOccupied(entity, stepX, stepY)) {
                 entity.getMovement().reset();
                 return false;
             }
-            if (DumbRoute.getDirection(entity.getRouteFinder().getClipUtils(), entity.getAbsX(), entity.getAbsY(), entity.getZ(), entity.getSize(), stepX, stepY) == null) {
+            if (DumbRoute.getDirection(entity.getRouteFinder().getClipUtils(), entity.getAbsX(), entity.getAbsY(),
+                    entity.getZ(), entity.getSize(), stepX, stepY) == null) {
                 return false;
             }
         }
@@ -410,14 +445,14 @@ public class RouteFinder {
     int foundMapX, foundMapY;
 
     public int findRoute(
-        int fromMapX,
-        int fromMapY,
-        int size,
-        RouteType route,
-        ClipUtils clipUtils,
-        boolean findAlternative,
-        int[] stepsX,
-        int[] stepsY) {
+            int fromMapX,
+            int fromMapY,
+            int size,
+            RouteType route,
+            ClipUtils clipUtils,
+            boolean findAlternative,
+            int[] stepsX,
+            int[] stepsY) {
         for (int x = 0; x < 128; x++) {
             for (int y = 0; y < 128; y++) {
                 directions[x][y] = 0;
@@ -438,7 +473,8 @@ public class RouteFinder {
         int foundMapX = this.foundMapX;
         int foundMapY = this.foundMapY;
         if (!route.reachable) {
-            if (!findAlternative) return -1;
+            if (!findAlternative)
+                return -1;
             int lowestCost = 2147483647;
             int lowestDistance = 2147483647;
             int checkRange = 10;
@@ -446,31 +482,29 @@ public class RouteFinder {
             int toMapY = route.y;
             int toSizeX = route.xLength;
             int toSizeY = route.yLength;
-            for (int checkMapX = toMapX - checkRange;
-                 checkMapX <= toMapX + checkRange;
-                 checkMapX++) {
-                for (int checkMapY = toMapY - checkRange;
-                     checkMapY <= checkRange + toMapY;
-                     checkMapY++) {
+            for (int checkMapX = toMapX - checkRange; checkMapX <= toMapX + checkRange; checkMapX++) {
+                for (int checkMapY = toMapY - checkRange; checkMapY <= checkRange + toMapY; checkMapY++) {
                     int arrayX = checkMapX - arrayOffsetX;
                     int arrayY = checkMapY - arrayOffsetY;
                     if (arrayX >= 0
-                        && arrayY >= 0
-                        && arrayX < 128
-                        && arrayY < 128
-                        && (distances[arrayX][arrayY] < 100)) {
+                            && arrayY >= 0
+                            && arrayX < 128
+                            && arrayY < 128
+                            && (distances[arrayX][arrayY] < 100)) {
                         int deltaX = 0;
-                        if (checkMapX < toMapX) deltaX = toMapX - checkMapX;
+                        if (checkMapX < toMapX)
+                            deltaX = toMapX - checkMapX;
                         else if (checkMapX > toSizeX + toMapX - 1)
                             deltaX = checkMapX - (toSizeX + toMapX - 1);
                         int deltaY = 0;
-                        if (checkMapY < toMapY) deltaY = toMapY - checkMapY;
+                        if (checkMapY < toMapY)
+                            deltaY = toMapY - checkMapY;
                         else if (checkMapY > toSizeY + toMapY - 1)
                             deltaY = checkMapY - (toMapY + toSizeY - 1);
                         int cost = deltaY * deltaY + deltaX * deltaX;
                         if (cost < lowestCost
-                            || (lowestCost == cost
-                            && (distances[arrayX][arrayY]) < lowestDistance)) {
+                                || (lowestCost == cost
+                                        && (distances[arrayX][arrayY]) < lowestDistance)) {
                             lowestCost = cost;
                             lowestDistance = (distances[arrayX][arrayY]);
                             foundMapX = checkMapX;
@@ -479,33 +513,38 @@ public class RouteFinder {
                     }
                 }
             }
-            if (2147483647 == lowestCost) return -1;
+            if (2147483647 == lowestCost)
+                return -1;
         }
-        if (foundMapX == fromMapX && fromMapY == foundMapY) return 0;
+        if (foundMapX == fromMapX && fromMapY == foundMapY)
+            return 0;
         int writeOffset = 0;
         queueX[writeOffset] = foundMapX;
         queueY[writeOffset++] = foundMapY;
         int lastWrittenDirection;
-        int direction =
-            lastWrittenDirection =
-                (directions[foundMapX - arrayOffsetX][foundMapY - arrayOffsetY]);
+        int direction = lastWrittenDirection = (directions[foundMapX - arrayOffsetX][foundMapY - arrayOffsetY]);
         while (foundMapX != fromMapX || fromMapY != foundMapY) {
             if (lastWrittenDirection != direction) {
                 lastWrittenDirection = direction;
                 queueX[writeOffset] = foundMapX;
                 queueY[writeOffset++] = foundMapY;
             }
-            if ((direction & 0x2) != 0) foundMapX++;
-            else if ((direction & 0x8) != 0) foundMapX--;
-            if ((direction & 0x1) != 0) foundMapY++;
-            else if ((direction & 0x4) != 0) foundMapY--;
+            if ((direction & 0x2) != 0)
+                foundMapX++;
+            else if ((direction & 0x8) != 0)
+                foundMapX--;
+            if ((direction & 0x1) != 0)
+                foundMapY++;
+            else if ((direction & 0x4) != 0)
+                foundMapY--;
             direction = (directions[foundMapX - arrayOffsetX][foundMapY - arrayOffsetY]);
         }
         int stepCount = 0;
         while (writeOffset-- > 0) {
             stepsX[stepCount] = clipUtils.baseX + queueX[writeOffset];
             stepsY[stepCount] = clipUtils.baseY + queueY[writeOffset];
-            if (++stepCount >= stepsX.length) break;
+            if (++stepCount >= stepsX.length)
+                break;
         }
         return stepCount;
     }
@@ -538,8 +577,8 @@ public class RouteFinder {
             }
             int distance = distances[currentArrayOffsetX][currentArrayOffsetY] + 1;
             if (currentArrayOffsetX > 0
-                && directions[currentArrayOffsetX - 1][currentArrayOffsetY] == 0
-                && (clipUtils.get(currentClipMapX - 1, currentClipMapY) & WEST_MASK) == 0) {
+                    && directions[currentArrayOffsetX - 1][currentArrayOffsetY] == 0
+                    && (clipUtils.get(currentClipMapX - 1, currentClipMapY) & WEST_MASK) == 0) {
                 queueX[writeOffset] = currentMapX - 1;
                 queueY[writeOffset] = currentMapY;
                 writeOffset = writeOffset + 1 & 0xfff;
@@ -547,8 +586,8 @@ public class RouteFinder {
                 distances[currentArrayOffsetX - 1][currentArrayOffsetY] = distance;
             }
             if (currentArrayOffsetX < 127
-                && directions[currentArrayOffsetX + 1][currentArrayOffsetY] == 0
-                && (clipUtils.get(currentClipMapX + 1, currentClipMapY) & EAST_MASK) == 0) {
+                    && directions[currentArrayOffsetX + 1][currentArrayOffsetY] == 0
+                    && (clipUtils.get(currentClipMapX + 1, currentClipMapY) & EAST_MASK) == 0) {
                 queueX[writeOffset] = currentMapX + 1;
                 queueY[writeOffset] = currentMapY;
                 writeOffset = writeOffset + 1 & 0xfff;
@@ -556,8 +595,8 @@ public class RouteFinder {
                 distances[currentArrayOffsetX + 1][currentArrayOffsetY] = distance;
             }
             if (currentArrayOffsetY > 0
-                && directions[currentArrayOffsetX][currentArrayOffsetY - 1] == 0
-                && (clipUtils.get(currentClipMapX, currentClipMapY - 1) & SOUTH_MASK) == 0) {
+                    && directions[currentArrayOffsetX][currentArrayOffsetY - 1] == 0
+                    && (clipUtils.get(currentClipMapX, currentClipMapY - 1) & SOUTH_MASK) == 0) {
                 queueX[writeOffset] = currentMapX;
                 queueY[writeOffset] = currentMapY - 1;
                 writeOffset = writeOffset + 1 & 0xfff;
@@ -565,8 +604,8 @@ public class RouteFinder {
                 distances[currentArrayOffsetX][currentArrayOffsetY - 1] = distance;
             }
             if (currentArrayOffsetY < 127
-                && directions[currentArrayOffsetX][currentArrayOffsetY + 1] == 0
-                && (clipUtils.get(currentClipMapX, currentClipMapY + 1) & NORTH_MASK) == 0) {
+                    && directions[currentArrayOffsetX][currentArrayOffsetY + 1] == 0
+                    && (clipUtils.get(currentClipMapX, currentClipMapY + 1) & NORTH_MASK) == 0) {
                 queueX[writeOffset] = currentMapX;
                 queueY[writeOffset] = currentMapY + 1;
                 writeOffset = writeOffset + 1 & 0xfff;
@@ -574,12 +613,11 @@ public class RouteFinder {
                 distances[currentArrayOffsetX][currentArrayOffsetY + 1] = distance;
             }
             if (currentArrayOffsetX > 0
-                && currentArrayOffsetY > 0
-                && directions[currentArrayOffsetX - 1][currentArrayOffsetY - 1] == 0
-                && (clipUtils.get(currentClipMapX - 1, currentClipMapY - 1) & SOUTH_WEST_MASK)
-                == 0
-                && (clipUtils.get(currentClipMapX - 1, currentClipMapY) & WEST_MASK) == 0
-                && (clipUtils.get(currentClipMapX, currentClipMapY - 1) & SOUTH_MASK) == 0) {
+                    && currentArrayOffsetY > 0
+                    && directions[currentArrayOffsetX - 1][currentArrayOffsetY - 1] == 0
+                    && (clipUtils.get(currentClipMapX - 1, currentClipMapY - 1) & SOUTH_WEST_MASK) == 0
+                    && (clipUtils.get(currentClipMapX - 1, currentClipMapY) & WEST_MASK) == 0
+                    && (clipUtils.get(currentClipMapX, currentClipMapY - 1) & SOUTH_MASK) == 0) {
                 queueX[writeOffset] = currentMapX - 1;
                 queueY[writeOffset] = currentMapY - 1;
                 writeOffset = writeOffset + 1 & 0xfff;
@@ -587,12 +625,11 @@ public class RouteFinder {
                 distances[currentArrayOffsetX - 1][currentArrayOffsetY - 1] = distance;
             }
             if (currentArrayOffsetX < 127
-                && currentArrayOffsetY > 0
-                && directions[currentArrayOffsetX + 1][currentArrayOffsetY - 1] == 0
-                && (clipUtils.get(currentClipMapX + 1, currentClipMapY - 1) & SOUTH_EAST_MASK)
-                == 0
-                && (clipUtils.get(currentClipMapX + 1, currentClipMapY) & EAST_MASK) == 0
-                && (clipUtils.get(currentClipMapX, currentClipMapY - 1) & SOUTH_MASK) == 0) {
+                    && currentArrayOffsetY > 0
+                    && directions[currentArrayOffsetX + 1][currentArrayOffsetY - 1] == 0
+                    && (clipUtils.get(currentClipMapX + 1, currentClipMapY - 1) & SOUTH_EAST_MASK) == 0
+                    && (clipUtils.get(currentClipMapX + 1, currentClipMapY) & EAST_MASK) == 0
+                    && (clipUtils.get(currentClipMapX, currentClipMapY - 1) & SOUTH_MASK) == 0) {
                 queueX[writeOffset] = currentMapX + 1;
                 queueY[writeOffset] = currentMapY - 1;
                 writeOffset = writeOffset + 1 & 0xfff;
@@ -600,12 +637,11 @@ public class RouteFinder {
                 distances[currentArrayOffsetX + 1][currentArrayOffsetY - 1] = distance;
             }
             if (currentArrayOffsetX > 0
-                && currentArrayOffsetY < 127
-                && directions[currentArrayOffsetX - 1][currentArrayOffsetY + 1] == 0
-                && (clipUtils.get(currentClipMapX - 1, currentClipMapY + 1) & NORTH_WEST_MASK)
-                == 0
-                && (clipUtils.get(currentClipMapX - 1, currentClipMapY) & WEST_MASK) == 0
-                && (clipUtils.get(currentClipMapX, currentClipMapY + 1) & NORTH_MASK) == 0) {
+                    && currentArrayOffsetY < 127
+                    && directions[currentArrayOffsetX - 1][currentArrayOffsetY + 1] == 0
+                    && (clipUtils.get(currentClipMapX - 1, currentClipMapY + 1) & NORTH_WEST_MASK) == 0
+                    && (clipUtils.get(currentClipMapX - 1, currentClipMapY) & WEST_MASK) == 0
+                    && (clipUtils.get(currentClipMapX, currentClipMapY + 1) & NORTH_MASK) == 0) {
                 queueX[writeOffset] = currentMapX - 1;
                 queueY[writeOffset] = currentMapY + 1;
                 writeOffset = writeOffset + 1 & 0xfff;
@@ -613,12 +649,11 @@ public class RouteFinder {
                 distances[currentArrayOffsetX - 1][currentArrayOffsetY + 1] = distance;
             }
             if (currentArrayOffsetX < 127
-                && currentArrayOffsetY < 127
-                && directions[currentArrayOffsetX + 1][currentArrayOffsetY + 1] == 0
-                && (clipUtils.get(currentClipMapX + 1, currentClipMapY + 1) & NORTH_EAST_MASK)
-                == 0
-                && (clipUtils.get(currentClipMapX + 1, currentClipMapY) & EAST_MASK) == 0
-                && (clipUtils.get(currentClipMapX, currentClipMapY + 1) & NORTH_MASK) == 0) {
+                    && currentArrayOffsetY < 127
+                    && directions[currentArrayOffsetX + 1][currentArrayOffsetY + 1] == 0
+                    && (clipUtils.get(currentClipMapX + 1, currentClipMapY + 1) & NORTH_EAST_MASK) == 0
+                    && (clipUtils.get(currentClipMapX + 1, currentClipMapY) & EAST_MASK) == 0
+                    && (clipUtils.get(currentClipMapX, currentClipMapY + 1) & NORTH_MASK) == 0) {
                 queueX[writeOffset] = currentMapX + 1;
                 queueY[writeOffset] = currentMapY + 1;
                 writeOffset = writeOffset + 1 & 0xfff;
@@ -659,10 +694,9 @@ public class RouteFinder {
             }
             int distance = distances[currentArrayOffsetX][currentArrayOffsetY] + 1;
             if (currentArrayOffsetX > 0
-                && (directions[currentArrayOffsetX - 1][currentArrayOffsetY]) == 0
-                && (clipUtils.get(currentClipMapX - 1, currentClipMapY) & SOUTH_WEST_MASK) == 0
-                && (clipUtils.get(currentClipMapX - 1, currentClipMapY + 1) & NORTH_WEST_MASK)
-                == 0) {
+                    && (directions[currentArrayOffsetX - 1][currentArrayOffsetY]) == 0
+                    && (clipUtils.get(currentClipMapX - 1, currentClipMapY) & SOUTH_WEST_MASK) == 0
+                    && (clipUtils.get(currentClipMapX - 1, currentClipMapY + 1) & NORTH_WEST_MASK) == 0) {
                 queueX[writeOffset] = currentMapX - 1;
                 queueY[writeOffset] = currentMapY;
                 writeOffset = writeOffset + 1 & 0xfff;
@@ -670,10 +704,9 @@ public class RouteFinder {
                 distances[currentArrayOffsetX - 1][currentArrayOffsetY] = distance;
             }
             if (currentArrayOffsetX < 126
-                && (directions[currentArrayOffsetX + 1][currentArrayOffsetY]) == 0
-                && (clipUtils.get(currentClipMapX + 2, currentClipMapY) & SOUTH_EAST_MASK) == 0
-                && (clipUtils.get(currentClipMapX + 2, currentClipMapY + 1) & NORTH_EAST_MASK)
-                == 0) {
+                    && (directions[currentArrayOffsetX + 1][currentArrayOffsetY]) == 0
+                    && (clipUtils.get(currentClipMapX + 2, currentClipMapY) & SOUTH_EAST_MASK) == 0
+                    && (clipUtils.get(currentClipMapX + 2, currentClipMapY + 1) & NORTH_EAST_MASK) == 0) {
                 queueX[writeOffset] = currentMapX + 1;
                 queueY[writeOffset] = currentMapY;
                 writeOffset = writeOffset + 1 & 0xfff;
@@ -681,10 +714,9 @@ public class RouteFinder {
                 distances[currentArrayOffsetX + 1][currentArrayOffsetY] = distance;
             }
             if (currentArrayOffsetY > 0
-                && (directions[currentArrayOffsetX][currentArrayOffsetY - 1]) == 0
-                && (clipUtils.get(currentClipMapX, currentClipMapY - 1) & SOUTH_WEST_MASK) == 0
-                && (clipUtils.get(currentClipMapX + 1, currentClipMapY - 1) & SOUTH_EAST_MASK)
-                == 0) {
+                    && (directions[currentArrayOffsetX][currentArrayOffsetY - 1]) == 0
+                    && (clipUtils.get(currentClipMapX, currentClipMapY - 1) & SOUTH_WEST_MASK) == 0
+                    && (clipUtils.get(currentClipMapX + 1, currentClipMapY - 1) & SOUTH_EAST_MASK) == 0) {
                 queueX[writeOffset] = currentMapX;
                 queueY[writeOffset] = currentMapY - 1;
                 writeOffset = writeOffset + 1 & 0xfff;
@@ -692,10 +724,9 @@ public class RouteFinder {
                 distances[currentArrayOffsetX][currentArrayOffsetY - 1] = distance;
             }
             if (currentArrayOffsetY < 126
-                && (directions[currentArrayOffsetX][currentArrayOffsetY + 1]) == 0
-                && (clipUtils.get(currentClipMapX, currentClipMapY + 2) & NORTH_WEST_MASK) == 0
-                && (clipUtils.get(currentClipMapX + 1, currentClipMapY + 2) & NORTH_EAST_MASK)
-                == 0) {
+                    && (directions[currentArrayOffsetX][currentArrayOffsetY + 1]) == 0
+                    && (clipUtils.get(currentClipMapX, currentClipMapY + 2) & NORTH_WEST_MASK) == 0
+                    && (clipUtils.get(currentClipMapX + 1, currentClipMapY + 2) & NORTH_EAST_MASK) == 0) {
                 queueX[writeOffset] = currentMapX;
                 queueY[writeOffset] = currentMapY + 1;
                 writeOffset = writeOffset + 1 & 0xfff;
@@ -703,12 +734,11 @@ public class RouteFinder {
                 distances[currentArrayOffsetX][currentArrayOffsetY + 1] = distance;
             }
             if (currentArrayOffsetX > 0
-                && currentArrayOffsetY > 0
-                && (directions[currentArrayOffsetX - 1][currentArrayOffsetY - 1]) == 0
-                && (clipUtils.get(currentClipMapX - 1, currentClipMapY) & 0x124013e) == 0
-                && (clipUtils.get(currentClipMapX - 1, currentClipMapY - 1) & SOUTH_WEST_MASK)
-                == 0
-                && (clipUtils.get(currentClipMapX, currentClipMapY - 1) & 0x124018f) == 0) {
+                    && currentArrayOffsetY > 0
+                    && (directions[currentArrayOffsetX - 1][currentArrayOffsetY - 1]) == 0
+                    && (clipUtils.get(currentClipMapX - 1, currentClipMapY) & 0x124013e) == 0
+                    && (clipUtils.get(currentClipMapX - 1, currentClipMapY - 1) & SOUTH_WEST_MASK) == 0
+                    && (clipUtils.get(currentClipMapX, currentClipMapY - 1) & 0x124018f) == 0) {
                 queueX[writeOffset] = currentMapX - 1;
                 queueY[writeOffset] = currentMapY - 1;
                 writeOffset = writeOffset + 1 & 0xfff;
@@ -716,12 +746,11 @@ public class RouteFinder {
                 distances[currentArrayOffsetX - 1][currentArrayOffsetY - 1] = distance;
             }
             if (currentArrayOffsetX < 126
-                && currentArrayOffsetY > 0
-                && (directions[currentArrayOffsetX + 1][currentArrayOffsetY - 1]) == 0
-                && (clipUtils.get(currentClipMapX + 1, currentClipMapY - 1) & 0x124018f) == 0
-                && (clipUtils.get(currentClipMapX + 2, currentClipMapY - 1) & SOUTH_EAST_MASK)
-                == 0
-                && (clipUtils.get(currentClipMapX + 2, currentClipMapY) & 0x12401e3) == 0) {
+                    && currentArrayOffsetY > 0
+                    && (directions[currentArrayOffsetX + 1][currentArrayOffsetY - 1]) == 0
+                    && (clipUtils.get(currentClipMapX + 1, currentClipMapY - 1) & 0x124018f) == 0
+                    && (clipUtils.get(currentClipMapX + 2, currentClipMapY - 1) & SOUTH_EAST_MASK) == 0
+                    && (clipUtils.get(currentClipMapX + 2, currentClipMapY) & 0x12401e3) == 0) {
                 queueX[writeOffset] = currentMapX + 1;
                 queueY[writeOffset] = currentMapY - 1;
                 writeOffset = writeOffset + 1 & 0xfff;
@@ -729,12 +758,11 @@ public class RouteFinder {
                 distances[currentArrayOffsetX + 1][currentArrayOffsetY - 1] = distance;
             }
             if (currentArrayOffsetX > 0
-                && currentArrayOffsetY < 126
-                && (directions[currentArrayOffsetX - 1][currentArrayOffsetY + 1]) == 0
-                && (clipUtils.get(currentClipMapX - 1, currentClipMapY + 1) & 0x124013e) == 0
-                && (clipUtils.get(currentClipMapX - 1, currentClipMapY + 2) & NORTH_WEST_MASK)
-                == 0
-                && (clipUtils.get(currentClipMapX, currentClipMapY + 2) & 0x12401f8) == 0) {
+                    && currentArrayOffsetY < 126
+                    && (directions[currentArrayOffsetX - 1][currentArrayOffsetY + 1]) == 0
+                    && (clipUtils.get(currentClipMapX - 1, currentClipMapY + 1) & 0x124013e) == 0
+                    && (clipUtils.get(currentClipMapX - 1, currentClipMapY + 2) & NORTH_WEST_MASK) == 0
+                    && (clipUtils.get(currentClipMapX, currentClipMapY + 2) & 0x12401f8) == 0) {
                 queueX[writeOffset] = currentMapX - 1;
                 queueY[writeOffset] = currentMapY + 1;
                 writeOffset = writeOffset + 1 & 0xfff;
@@ -742,12 +770,11 @@ public class RouteFinder {
                 distances[currentArrayOffsetX - 1][currentArrayOffsetY + 1] = distance;
             }
             if (currentArrayOffsetX < 126
-                && currentArrayOffsetY < 126
-                && (directions[currentArrayOffsetX + 1][currentArrayOffsetY + 1]) == 0
-                && (clipUtils.get(currentClipMapX + 1, currentClipMapY + 2) & 0x12401f8) == 0
-                && (clipUtils.get(currentClipMapX + 2, currentClipMapY + 2) & NORTH_EAST_MASK)
-                == 0
-                && (clipUtils.get(currentClipMapX + 2, currentClipMapY + 1) & 0x12401e3) == 0) {
+                    && currentArrayOffsetY < 126
+                    && (directions[currentArrayOffsetX + 1][currentArrayOffsetY + 1]) == 0
+                    && (clipUtils.get(currentClipMapX + 1, currentClipMapY + 2) & 0x12401f8) == 0
+                    && (clipUtils.get(currentClipMapX + 2, currentClipMapY + 2) & NORTH_EAST_MASK) == 0
+                    && (clipUtils.get(currentClipMapX + 2, currentClipMapY + 1) & 0x12401e3) == 0) {
                 queueX[writeOffset] = currentMapX + 1;
                 queueY[writeOffset] = currentMapY + 1;
                 writeOffset = writeOffset + 1 & 0xfff;
@@ -761,7 +788,7 @@ public class RouteFinder {
     }
 
     private boolean findRouteX(
-        int fromMapX, int fromMapY, int size, RouteType route, ClipUtils clipUtils) {
+            int fromMapX, int fromMapY, int size, RouteType route, ClipUtils clipUtils) {
         int currentMapX = fromMapX;
         int currentMapY = fromMapY;
         int currentArrayOffsetX = 64;
@@ -774,8 +801,7 @@ public class RouteFinder {
         int readOffset = 0;
         queueX[writeOffset] = fromMapX;
         queueY[writeOffset++] = fromMapY;
-        w:
-        while (readOffset != writeOffset) {
+        w: while (readOffset != writeOffset) {
             currentMapX = queueX[readOffset];
             currentMapY = queueY[readOffset];
             readOffset = readOffset + 1 & 0xfff;
@@ -790,11 +816,10 @@ public class RouteFinder {
             }
             int distance = distances[currentArrayOffsetX][currentArrayOffsetY] + 1;
             if (currentArrayOffsetX > 0
-                && directions[currentArrayOffsetX - 1][currentArrayOffsetY] == 0
-                && (clipUtils.get(currentClipMapX - 1, currentClipMapY) & SOUTH_WEST_MASK) == 0
-                && (clipUtils.get(currentClipMapX - 1, currentClipMapY + size - 1)
-                & NORTH_WEST_MASK)
-                == 0) {
+                    && directions[currentArrayOffsetX - 1][currentArrayOffsetY] == 0
+                    && (clipUtils.get(currentClipMapX - 1, currentClipMapY) & SOUTH_WEST_MASK) == 0
+                    && (clipUtils.get(currentClipMapX - 1, currentClipMapY + size - 1)
+                            & NORTH_WEST_MASK) == 0) {
                 for (int i = 1; i < size; i++) {
                     if ((clipUtils.get(currentClipMapX - 1, i + currentClipMapY) & 0x124013e) != 0)
                         continue w;
@@ -806,15 +831,13 @@ public class RouteFinder {
                 distances[currentArrayOffsetX - 1][currentArrayOffsetY] = distance;
             }
             if (currentArrayOffsetX < 128 - size
-                && directions[currentArrayOffsetX + 1][currentArrayOffsetY] == 0
-                && (clipUtils.get(currentClipMapX + size, currentClipMapY) & SOUTH_EAST_MASK)
-                == 0
-                && (clipUtils.get(size + currentClipMapX, size + currentClipMapY - 1)
-                & NORTH_EAST_MASK)
-                == 0) {
+                    && directions[currentArrayOffsetX + 1][currentArrayOffsetY] == 0
+                    && (clipUtils.get(currentClipMapX + size, currentClipMapY) & SOUTH_EAST_MASK) == 0
+                    && (clipUtils.get(size + currentClipMapX, size + currentClipMapY - 1)
+                            & NORTH_EAST_MASK) == 0) {
                 for (int i = 1; i < size; i++) {
-                    if ((clipUtils.get(size + currentClipMapX, currentClipMapY + i) & 0x12401e3)
-                        != 0) continue w;
+                    if ((clipUtils.get(size + currentClipMapX, currentClipMapY + i) & 0x12401e3) != 0)
+                        continue w;
                 }
                 queueX[writeOffset] = currentMapX + 1;
                 queueY[writeOffset] = currentMapY;
@@ -823,11 +846,10 @@ public class RouteFinder {
                 distances[currentArrayOffsetX + 1][currentArrayOffsetY] = distance;
             }
             if (currentArrayOffsetY > 0
-                && directions[currentArrayOffsetX][currentArrayOffsetY - 1] == 0
-                && (clipUtils.get(currentClipMapX, currentClipMapY - 1) & SOUTH_WEST_MASK) == 0
-                && (clipUtils.get(size + currentClipMapX - 1, currentClipMapY - 1)
-                & SOUTH_EAST_MASK)
-                == 0) {
+                    && directions[currentArrayOffsetX][currentArrayOffsetY - 1] == 0
+                    && (clipUtils.get(currentClipMapX, currentClipMapY - 1) & SOUTH_WEST_MASK) == 0
+                    && (clipUtils.get(size + currentClipMapX - 1, currentClipMapY - 1)
+                            & SOUTH_EAST_MASK) == 0) {
                 for (int i = 1; i < size; i++) {
                     if ((clipUtils.get(currentClipMapX + i, currentClipMapY - 1) & 0x124018f) != 0)
                         continue w;
@@ -839,15 +861,13 @@ public class RouteFinder {
                 distances[currentArrayOffsetX][currentArrayOffsetY - 1] = distance;
             }
             if (currentArrayOffsetY < 128 - size
-                && directions[currentArrayOffsetX][currentArrayOffsetY + 1] == 0
-                && (clipUtils.get(currentClipMapX, currentClipMapY + size) & NORTH_WEST_MASK)
-                == 0
-                && (clipUtils.get(currentClipMapX + size - 1, size + currentClipMapY)
-                & NORTH_EAST_MASK)
-                == 0) {
+                    && directions[currentArrayOffsetX][currentArrayOffsetY + 1] == 0
+                    && (clipUtils.get(currentClipMapX, currentClipMapY + size) & NORTH_WEST_MASK) == 0
+                    && (clipUtils.get(currentClipMapX + size - 1, size + currentClipMapY)
+                            & NORTH_EAST_MASK) == 0) {
                 for (int i = 1; i < size; i++) {
-                    if ((clipUtils.get(i + currentClipMapX, currentClipMapY + size) & 0x12401f8)
-                        != 0) continue w;
+                    if ((clipUtils.get(i + currentClipMapX, currentClipMapY + size) & 0x12401f8) != 0)
+                        continue w;
                 }
                 queueX[writeOffset] = currentMapX;
                 queueY[writeOffset] = currentMapY + 1;
@@ -856,16 +876,14 @@ public class RouteFinder {
                 distances[currentArrayOffsetX][currentArrayOffsetY + 1] = distance;
             }
             if (currentArrayOffsetX > 0
-                && currentArrayOffsetY > 0
-                && directions[currentArrayOffsetX - 1][currentArrayOffsetY - 1] == 0
-                && (clipUtils.get(currentClipMapX - 1, currentClipMapY - 1) & SOUTH_WEST_MASK)
-                == 0) {
+                    && currentArrayOffsetY > 0
+                    && directions[currentArrayOffsetX - 1][currentArrayOffsetY - 1] == 0
+                    && (clipUtils.get(currentClipMapX - 1, currentClipMapY - 1) & SOUTH_WEST_MASK) == 0) {
                 for (int i = 1; i < size; i++) {
-                    if ((clipUtils.get(currentClipMapX - 1, i + (currentClipMapY - 1)) & 0x124013e)
-                        != 0
-                        || ((clipUtils.get(i + (currentClipMapX - 1), currentClipMapY - 1)
-                        & 0x124018f)
-                        != 0)) continue w;
+                    if ((clipUtils.get(currentClipMapX - 1, i + (currentClipMapY - 1)) & 0x124013e) != 0
+                            || ((clipUtils.get(i + (currentClipMapX - 1), currentClipMapY - 1)
+                                    & 0x124018f) != 0))
+                        continue w;
                 }
                 queueX[writeOffset] = currentMapX - 1;
                 queueY[writeOffset] = currentMapY - 1;
@@ -874,16 +892,14 @@ public class RouteFinder {
                 distances[currentArrayOffsetX - 1][currentArrayOffsetY - 1] = distance;
             }
             if (currentArrayOffsetX < 128 - size
-                && currentArrayOffsetY > 0
-                && directions[currentArrayOffsetX + 1][currentArrayOffsetY - 1] == 0
-                && (clipUtils.get(currentClipMapX + size, currentClipMapY - 1)
-                & SOUTH_EAST_MASK)
-                == 0) {
+                    && currentArrayOffsetY > 0
+                    && directions[currentArrayOffsetX + 1][currentArrayOffsetY - 1] == 0
+                    && (clipUtils.get(currentClipMapX + size, currentClipMapY - 1)
+                            & SOUTH_EAST_MASK) == 0) {
                 for (int i = 1; i < size; i++) {
-                    if ((clipUtils.get(size + currentClipMapX, currentClipMapY - 1 + i) & 0x12401e3)
-                        != 0
-                        || (clipUtils.get(i + currentClipMapX, currentClipMapY - 1) & 0x124018f)
-                        != 0) continue w;
+                    if ((clipUtils.get(size + currentClipMapX, currentClipMapY - 1 + i) & 0x12401e3) != 0
+                            || (clipUtils.get(i + currentClipMapX, currentClipMapY - 1) & 0x124018f) != 0)
+                        continue w;
                 }
                 queueX[writeOffset] = currentMapX + 1;
                 queueY[writeOffset] = currentMapY - 1;
@@ -892,16 +908,15 @@ public class RouteFinder {
                 distances[currentArrayOffsetX + 1][currentArrayOffsetY - 1] = distance;
             }
             if (currentArrayOffsetX > 0
-                && currentArrayOffsetY < 128 - size
-                && directions[currentArrayOffsetX - 1][currentArrayOffsetY + 1] == 0
-                && (clipUtils.get(currentClipMapX - 1, size + currentClipMapY)
-                & NORTH_WEST_MASK)
-                == 0) {
+                    && currentArrayOffsetY < 128 - size
+                    && directions[currentArrayOffsetX - 1][currentArrayOffsetY + 1] == 0
+                    && (clipUtils.get(currentClipMapX - 1, size + currentClipMapY)
+                            & NORTH_WEST_MASK) == 0) {
                 for (int i = 1; i < size; i++) {
                     if ((clipUtils.get(currentClipMapX - 1, i + currentClipMapY) & 0x124013e) != 0
-                        || (clipUtils.get(currentClipMapX - 1 + i, size + currentClipMapY)
-                        & 0x12401f8)
-                        != 0) continue w;
+                            || (clipUtils.get(currentClipMapX - 1 + i, size + currentClipMapY)
+                                    & 0x12401f8) != 0)
+                        continue w;
                 }
                 queueX[writeOffset] = currentMapX - 1;
                 queueY[writeOffset] = currentMapY + 1;
@@ -910,17 +925,15 @@ public class RouteFinder {
                 distances[currentArrayOffsetX - 1][currentArrayOffsetY + 1] = distance;
             }
             if (currentArrayOffsetX < 128 - size
-                && currentArrayOffsetY < 128 - size
-                && directions[currentArrayOffsetX + 1][currentArrayOffsetY + 1] == 0
-                && (clipUtils.get(size + currentClipMapX, size + currentClipMapY)
-                & NORTH_EAST_MASK)
-                == 0) {
+                    && currentArrayOffsetY < 128 - size
+                    && directions[currentArrayOffsetX + 1][currentArrayOffsetY + 1] == 0
+                    && (clipUtils.get(size + currentClipMapX, size + currentClipMapY)
+                            & NORTH_EAST_MASK) == 0) {
                 for (int i = 1; i < size; i++) {
-                    if ((clipUtils.get(currentClipMapX + i, size + currentClipMapY) & 0x12401f8)
-                        != 0
-                        || (clipUtils.get(currentClipMapX + size, currentClipMapY + i)
-                        & 0x12401e3)
-                        != 0) continue w;
+                    if ((clipUtils.get(currentClipMapX + i, size + currentClipMapY) & 0x12401f8) != 0
+                            || (clipUtils.get(currentClipMapX + size, currentClipMapY + i)
+                                    & 0x12401e3) != 0)
+                        continue w;
                 }
                 queueX[writeOffset] = currentMapX + 1;
                 queueY[writeOffset] = currentMapY + 1;
@@ -939,17 +952,23 @@ public class RouteFinder {
      */
     public static int getDirectionMask(int diffX, int diffY) {
         if (diffX == -1) {
-            if (diffY == -1) return SOUTH_WEST_MASK;
-            if (diffY == 1) return NORTH_WEST_MASK;
+            if (diffY == -1)
+                return SOUTH_WEST_MASK;
+            if (diffY == 1)
+                return NORTH_WEST_MASK;
             return WEST_MASK;
         }
         if (diffX == 1) {
-            if (diffY == -1) return SOUTH_EAST_MASK;
-            if (diffY == 1) return NORTH_EAST_MASK;
+            if (diffY == -1)
+                return SOUTH_EAST_MASK;
+            if (diffY == 1)
+                return NORTH_EAST_MASK;
             return EAST_MASK;
         }
-        if (diffY == -1) return SOUTH_MASK;
-        if (diffY == 1) return NORTH_MASK;
+        if (diffY == -1)
+            return SOUTH_MASK;
+        if (diffY == 1)
+            return NORTH_MASK;
         return 0; // invalid diffs
     }
 
@@ -969,7 +988,7 @@ public class RouteFinder {
                     /* exclude this tile! */
                     continue;
                 }
-                //Tile tile = new Tile(x, y, fromZ);
+                // Tile tile = new Tile(x, y, fromZ);
                 Tile tile = Tile.get(x, y, fromZ);
                 if (tile != null && !tile.allowStandardEntrance()) {
                     /* tile can't be entered! */
@@ -978,7 +997,8 @@ public class RouteFinder {
                 positions.add(new Tile(x, y, fromZ));
             }
         }
-        if (positions.size() == 0) return new Tile(fromX, fromY, fromZ);
+        if (positions.size() == 0)
+            return new Tile(fromX, fromY, fromZ);
         return get(positions);
     }
 
@@ -995,11 +1015,11 @@ public class RouteFinder {
     }
 
     boolean findRouteXAlternative(
-        final int fromMapX,
-        final int fromMapY,
-        final int size,
-        RouteType route,
-        ClipUtils clipUtils) {
+            final int fromMapX,
+            final int fromMapY,
+            final int size,
+            RouteType route,
+            ClipUtils clipUtils) {
         int currentMapX = fromMapX;
         int currentMapY = fromMapY;
         final byte startOffsetX = 64;
@@ -1015,8 +1035,7 @@ public class RouteFinder {
         queueY[byte_2] = fromMapY;
 
         while (true) {
-            label313:
-            while (true) {
+            label313: while (true) {
                 int currentClipMapX;
                 int currentClipMapY;
                 int int_10;
@@ -1026,8 +1045,7 @@ public class RouteFinder {
                 do {
                     do {
                         do {
-                            label290:
-                            do {
+                            label290: do {
                                 if (int_7 == int_14) {
                                     foundMapX = currentMapX;
                                     foundMapY = currentMapY;
@@ -1049,15 +1067,13 @@ public class RouteFinder {
 
                                 int_10 = distances[int_12][int_13] + 1;
                                 if ((int_12 > 0)
-                                    && (directions[int_12 - 1][int_13] == 0)
-                                    && ((clipUtils.get(currentClipMapX - 1, currentClipMapY)
-                                    & 0x124010E)
-                                    == 0)
-                                    && ((clipUtils.get(
-                                    currentClipMapX - 1,
-                                    (currentClipMapY + size) - 1)
-                                    & 0x1240138)
-                                    == 0)) {
+                                        && (directions[int_12 - 1][int_13] == 0)
+                                        && ((clipUtils.get(currentClipMapX - 1, currentClipMapY)
+                                                & 0x124010E) == 0)
+                                        && ((clipUtils.get(
+                                                currentClipMapX - 1,
+                                                (currentClipMapY + size) - 1)
+                                                & 0x1240138) == 0)) {
                                     int_11 = 1;
 
                                     while (true) {
@@ -1071,10 +1087,9 @@ public class RouteFinder {
                                         }
 
                                         if ((clipUtils.get(
-                                            currentClipMapX - 1,
-                                            int_11 + currentClipMapY)
-                                            & 0x124013E)
-                                            != 0) {
+                                                currentClipMapX - 1,
+                                                int_11 + currentClipMapY)
+                                                & 0x124013E) != 0) {
                                             break;
                                         }
 
@@ -1083,15 +1098,13 @@ public class RouteFinder {
                                 }
 
                                 if ((int_12 < (128 - size))
-                                    && (directions[int_12 + 1][int_13] == 0)
-                                    && ((clipUtils.get(currentClipMapX + size, currentClipMapY)
-                                    & 0x1240183)
-                                    == 0)
-                                    && ((clipUtils.get(
-                                    currentClipMapX + size,
-                                    (currentClipMapY + size) - 1)
-                                    & 0x12401E0)
-                                    == 0)) {
+                                        && (directions[int_12 + 1][int_13] == 0)
+                                        && ((clipUtils.get(currentClipMapX + size, currentClipMapY)
+                                                & 0x1240183) == 0)
+                                        && ((clipUtils.get(
+                                                currentClipMapX + size,
+                                                (currentClipMapY + size) - 1)
+                                                & 0x12401E0) == 0)) {
                                     int_11 = 1;
 
                                     while (true) {
@@ -1105,10 +1118,9 @@ public class RouteFinder {
                                         }
 
                                         if ((clipUtils.get(
-                                            currentClipMapX + size,
-                                            currentClipMapY + int_11)
-                                            & 0x12401E3)
-                                            != 0) {
+                                                currentClipMapX + size,
+                                                currentClipMapY + int_11)
+                                                & 0x12401E3) != 0) {
                                             break;
                                         }
 
@@ -1117,15 +1129,13 @@ public class RouteFinder {
                                 }
 
                                 if ((int_13 > 0)
-                                    && (directions[int_12][int_13 - 1] == 0)
-                                    && ((clipUtils.get(currentClipMapX, currentClipMapY - 1)
-                                    & 0x124010E)
-                                    == 0)
-                                    && ((clipUtils.get(
-                                    (currentClipMapX + size) - 1,
-                                    currentClipMapY - 1)
-                                    & 0x1240183)
-                                    == 0)) {
+                                        && (directions[int_12][int_13 - 1] == 0)
+                                        && ((clipUtils.get(currentClipMapX, currentClipMapY - 1)
+                                                & 0x124010E) == 0)
+                                        && ((clipUtils.get(
+                                                (currentClipMapX + size) - 1,
+                                                currentClipMapY - 1)
+                                                & 0x1240183) == 0)) {
                                     int_11 = 1;
 
                                     while (true) {
@@ -1139,10 +1149,9 @@ public class RouteFinder {
                                         }
 
                                         if ((clipUtils.get(
-                                            currentClipMapX + int_11,
-                                            currentClipMapY - 1)
-                                            & 0x124018F)
-                                            != 0) {
+                                                currentClipMapX + int_11,
+                                                currentClipMapY - 1)
+                                                & 0x124018F) != 0) {
                                             break;
                                         }
 
@@ -1151,15 +1160,13 @@ public class RouteFinder {
                                 }
 
                                 if ((int_13 < (128 - size))
-                                    && (directions[int_12][int_13 + 1] == 0)
-                                    && ((clipUtils.get(currentClipMapX, currentClipMapY + size)
-                                    & 0x1240138)
-                                    == 0)
-                                    && ((clipUtils.get(
-                                    (currentClipMapX + size) - 1,
-                                    currentClipMapY + size)
-                                    & 0x12401E0)
-                                    == 0)) {
+                                        && (directions[int_12][int_13 + 1] == 0)
+                                        && ((clipUtils.get(currentClipMapX, currentClipMapY + size)
+                                                & 0x1240138) == 0)
+                                        && ((clipUtils.get(
+                                                (currentClipMapX + size) - 1,
+                                                currentClipMapY + size)
+                                                & 0x12401E0) == 0)) {
                                     int_11 = 1;
 
                                     while (true) {
@@ -1173,10 +1180,9 @@ public class RouteFinder {
                                         }
 
                                         if ((clipUtils.get(
-                                            int_11 + currentClipMapX,
-                                            currentClipMapY + size)
-                                            & 0x12401F8)
-                                            != 0) {
+                                                int_11 + currentClipMapX,
+                                                currentClipMapY + size)
+                                                & 0x12401F8) != 0) {
                                             break;
                                         }
 
@@ -1185,11 +1191,10 @@ public class RouteFinder {
                                 }
 
                                 if ((int_12 > 0)
-                                    && (int_13 > 0)
-                                    && (directions[int_12 - 1][int_13 - 1] == 0)
-                                    && ((clipUtils.get(currentClipMapX - 1, currentClipMapY - 1)
-                                    & 0x124010E)
-                                    == 0)) {
+                                        && (int_13 > 0)
+                                        && (directions[int_12 - 1][int_13 - 1] == 0)
+                                        && ((clipUtils.get(currentClipMapX - 1, currentClipMapY - 1)
+                                                & 0x124010E) == 0)) {
                                     int_11 = 1;
 
                                     while (true) {
@@ -1203,19 +1208,17 @@ public class RouteFinder {
                                         }
 
                                         if (((clipUtils.get(
-                                            currentClipMapX - 1,
-                                            int_11
-                                                + (currentClipMapY
-                                                - 1))
-                                            & 0x124013E)
-                                            != 0)
-                                            || ((clipUtils.get(
-                                            int_11
-                                                + (currentClipMapX
-                                                - 1),
-                                            currentClipMapY - 1)
-                                            & 0x124018F)
-                                            != 0)) {
+                                                currentClipMapX - 1,
+                                                int_11
+                                                        + (currentClipMapY
+                                                                - 1))
+                                                & 0x124013E) != 0)
+                                                || ((clipUtils.get(
+                                                        int_11
+                                                                + (currentClipMapX
+                                                                        - 1),
+                                                        currentClipMapY - 1)
+                                                        & 0x124018F) != 0)) {
                                             break;
                                         }
 
@@ -1224,13 +1227,12 @@ public class RouteFinder {
                                 }
 
                                 if ((int_12 < (128 - size))
-                                    && (int_13 > 0)
-                                    && (directions[int_12 + 1][int_13 - 1] == 0)
-                                    && ((clipUtils.get(
-                                    currentClipMapX + size,
-                                    currentClipMapY - 1)
-                                    & 0x1240183)
-                                    == 0)) {
+                                        && (int_13 > 0)
+                                        && (directions[int_12 + 1][int_13 - 1] == 0)
+                                        && ((clipUtils.get(
+                                                currentClipMapX + size,
+                                                currentClipMapY - 1)
+                                                & 0x1240183) == 0)) {
                                     int_11 = 1;
 
                                     while (true) {
@@ -1244,17 +1246,15 @@ public class RouteFinder {
                                         }
 
                                         if (((clipUtils.get(
-                                            currentClipMapX + size,
-                                            int_11
-                                                + (currentClipMapY
-                                                - 1))
-                                            & 0x12401E3)
-                                            != 0)
-                                            || ((clipUtils.get(
-                                            currentClipMapX + int_11,
-                                            currentClipMapY - 1)
-                                            & 0x124018F)
-                                            != 0)) {
+                                                currentClipMapX + size,
+                                                int_11
+                                                        + (currentClipMapY
+                                                                - 1))
+                                                & 0x12401E3) != 0)
+                                                || ((clipUtils.get(
+                                                        currentClipMapX + int_11,
+                                                        currentClipMapY - 1)
+                                                        & 0x124018F) != 0)) {
                                             break;
                                         }
 
@@ -1263,26 +1263,23 @@ public class RouteFinder {
                                 }
 
                                 if ((int_12 > 0)
-                                    && (int_13 < (128 - size))
-                                    && (directions[int_12 - 1][int_13 + 1] == 0)
-                                    && ((clipUtils.get(
-                                    currentClipMapX - 1,
-                                    currentClipMapY + size)
-                                    & 0x1240138)
-                                    == 0)) {
+                                        && (int_13 < (128 - size))
+                                        && (directions[int_12 - 1][int_13 + 1] == 0)
+                                        && ((clipUtils.get(
+                                                currentClipMapX - 1,
+                                                currentClipMapY + size)
+                                                & 0x1240138) == 0)) {
                                     for (int_11 = 1; int_11 < size; int_11++) {
                                         if (((clipUtils.get(
-                                            currentClipMapX - 1,
-                                            int_11 + currentClipMapY)
-                                            & 0x124013E)
-                                            != 0)
-                                            || ((clipUtils.get(
-                                            int_11
-                                                + (currentClipMapX
-                                                - 1),
-                                            currentClipMapY + size)
-                                            & 0x12401F8)
-                                            != 0)) {
+                                                currentClipMapX - 1,
+                                                int_11 + currentClipMapY)
+                                                & 0x124013E) != 0)
+                                                || ((clipUtils.get(
+                                                        int_11
+                                                                + (currentClipMapX
+                                                                        - 1),
+                                                        currentClipMapY + size)
+                                                        & 0x12401F8) != 0)) {
                                             continue label290;
                                         }
                                     }
@@ -1296,16 +1293,13 @@ public class RouteFinder {
                             } while (int_12 >= (128 - size));
                         } while (int_13 >= (128 - size));
                     } while (directions[int_12 + 1][int_13 + 1] != 0);
-                } while ((clipUtils.get(currentClipMapX + size, currentClipMapY + size) & 0x12401E0)
-                    != 0);
+                } while ((clipUtils.get(currentClipMapX + size, currentClipMapY + size) & 0x12401E0) != 0);
 
                 for (int_11 = 1; int_11 < size; int_11++) {
                     if (((clipUtils.get(int_11 + currentClipMapX, currentClipMapY + size)
-                        & 0x12401F8)
-                        != 0)
-                        || ((clipUtils.get(currentClipMapX + size, currentClipMapY + int_11)
-                        & 0x12401E3)
-                        != 0)) {
+                            & 0x12401F8) != 0)
+                            || ((clipUtils.get(currentClipMapX + size, currentClipMapY + int_11)
+                                    & 0x12401E3) != 0)) {
                         continue label313;
                     }
                 }

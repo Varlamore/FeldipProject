@@ -17,7 +17,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @Data
-public class PresetData { //create data can be shared here
+public class PresetData { // create data can be shared here
     private static final Logger logger = LogManager.getLogger(PresetData.class);
     private static final Gson gson = JGson.buildTypeAdapter();
     public int id;
@@ -70,7 +70,8 @@ public class PresetData { //create data can be shared here
 
     public static List<PresetData> loadDefaultPresets(File file) throws IOException {
         try (FileReader fileReader = new FileReader(file)) {
-            TypeToken<List<PresetData>> typeToken = new TypeToken<>() {};
+            TypeToken<List<PresetData>> typeToken = new TypeToken<>() {
+            };
             return gson.fromJson(fileReader, typeToken.getType());
         }
     }
@@ -78,13 +79,76 @@ public class PresetData { //create data can be shared here
     @Override
     public String toString() {
         return "PresetData{" +
-            ", id=" + id +
-            ", inventory=" + Arrays.toString(inventory) +
-            ", equipment=" + Arrays.toString(equipment) +
-            ", spellbook=" + spellbook +
-            ", button=" + button +
-            ", attribute=" + attribute +
-            '}';
+                ", id=" + id +
+                ", inventory=" + Arrays.toString(inventory) +
+                ", equipment=" + Arrays.toString(equipment) +
+                ", spellbook=" + spellbook +
+                ", button=" + button +
+                ", attribute=" + attribute +
+                '}';
     }
 
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Item[] getInventory() {
+        return inventory;
+    }
+
+    public void setInventory(Item[] inventory) {
+        this.inventory = inventory;
+    }
+
+    public Item[] getEquipment() {
+        return equipment;
+    }
+
+    public void setEquipment(Item[] equipment) {
+        this.equipment = equipment;
+    }
+
+    public MagicSpellbook getSpellbook() {
+        return spellbook;
+    }
+
+    public void setSpellbook(MagicSpellbook spellbook) {
+        this.spellbook = spellbook;
+    }
+
+    public int getButton() {
+        return button;
+    }
+
+    public void setButton(int button) {
+        this.button = button;
+    }
+
+    public AttributeKey getAttribute() {
+        return attribute;
+    }
+
+    public void setAttribute(AttributeKey attribute) {
+        this.attribute = attribute;
+    }
+
+    public int getCost() {
+        return cost;
+    }
+
+    public void setCost(int cost) {
+        this.cost = cost;
+    }
 }

@@ -9,6 +9,8 @@ public enum AttributeKey {
 
     RAKING,
 
+    FRUIT_TREE_STATE("fruit_tree_state", AttribType.INTEGER),
+
     RETREATING,
 
     MENACING_CURSE,
@@ -79,6 +81,11 @@ public enum AttributeKey {
      * Key used to store amount of compost we can collect
      */
     COMPOST_BIN("compost_bin", AttribType.INTEGER),
+
+    /**
+     * Farming Compost State (1=Normal, 2=Super, 3=Ultra)
+     */
+    COMPOST_STATE("compost_state", AttribType.INTEGER),
 
     /**
      * The recently listed items trading post page
@@ -153,11 +160,11 @@ public enum AttributeKey {
 
     HUNLESS_PREVIOUS_STYLE,
 
-    GAME_MODE_SELECTED,//sec bro it was wrong server didn't reset
+    GAME_MODE_SELECTED, // sec bro it was wrong server didn't reset
 
     VIEWING_COLLECTION_LOG,
 
-    //Collection log reward attributes
+    // Collection log reward attributes
     ALCHEMICAL_HYDRA_LOG_CLAIMED,
     ANCIENT_BARRELCHEST_LOG_CLAIMED,
     ANCIENT_CHAOS_ELEMENTAL_LOG_CLAIMED,
@@ -276,7 +283,8 @@ public enum AttributeKey {
     USING_TRADING_POST("using_trading_post", AttribType.BOOLEAN),
 
     /**
-     * special attacks queued. 1:1 with how many times you click the specbar when wearing gmaul.
+     * special attacks queued. 1:1 with how many times you click the specbar when
+     * wearing gmaul.
      */
     GRANITE_MAUL_SPECIALS,
 
@@ -309,7 +317,8 @@ public enum AttributeKey {
 
     RING_OF_ELYSIAN_ATTEMTPS("ring_of_elysian_attempts", AttribType.INTEGER),
 
-    // How much BM we last died with. Used to combat raggers/no risk suicide accounts.
+    // How much BM we last died with. Used to combat raggers/no risk suicide
+    // accounts.
     LASTDEATH_VALUE,
 
     PET_SHOUT_ABILITY("pet_ability_shout", AttribType.BOOLEAN),
@@ -320,7 +329,8 @@ public enum AttributeKey {
     STAKING_DOUBLE_DEATH,
 
     /*
-     * Flag if double death has been checked be the first person to die (down to PID)
+     * Flag if double death has been checked be the first person to die (down to
+     * PID)
      */
     ARENA_DEATH_TICK,
 
@@ -335,9 +345,10 @@ public enum AttributeKey {
 
     VIEWING_RUNE_POUCH_I,
 
-    //PvP tasks
+    // PvP tasks
     EDGE_PVP_DAILY_TASK_COMPLETION_AMOUNT("edge_daily_daily_task_completion_amount", AttribType.INTEGER),
-    REVENANT_CAVE_PVP_DAILY_TASK_COMPLETION_AMOUNT("revenant_cave_daily_daily_task_completion_amount", AttribType.INTEGER),
+    REVENANT_CAVE_PVP_DAILY_TASK_COMPLETION_AMOUNT("revenant_cave_daily_daily_task_completion_amount",
+            AttribType.INTEGER),
     DEEP_WILD_PVP_DAILY_TASK_COMPLETION_AMOUNT("deep_wild_daily_task_completion_amount", AttribType.INTEGER),
     PURE_PVP_DAILY_TASK_COMPLETION_AMOUNT("pure_daily_task_completion_amount", AttribType.INTEGER),
     ZERKER_PVP_DAILY_TASK_COMPLETION_AMOUNT("zerker_daily_task_completion_amount", AttribType.INTEGER),
@@ -345,7 +356,8 @@ public enum AttributeKey {
     NO_ARM_DAILY_TASK_COMPLETION_AMOUNT("no_arm_task_completion_amount", AttribType.INTEGER),
     DHAROK_DAILY_TASK_COMPLETION_AMOUNT("dharok_task_completion_amount", AttribType.INTEGER),
     BOTS_DAILY_TASK_COMPLETION_AMOUNT("bots_task_completion_amount", AttribType.INTEGER),
-    TOURNEY_PARTICIPATION_DAILY_TASK_COMPLETION_AMOUNT("tourney_participation_task_completion_amount", AttribType.INTEGER),
+    TOURNEY_PARTICIPATION_DAILY_TASK_COMPLETION_AMOUNT("tourney_participation_task_completion_amount",
+            AttribType.INTEGER),
 
     EDGE_PVP_DAILY_TASK_COMPLETED("edge_daily_daily_task_completed", AttribType.BOOLEAN),
     REVENANT_CAVE_PVP_DAILY_TASK_COMPLETED("revenant_cave_daily_daily_task_completed", AttribType.BOOLEAN),
@@ -369,7 +381,7 @@ public enum AttributeKey {
     BOTS_DAILY_TASK_REWARD_CLAIMED("bots_task_reward_claimed", AttribType.BOOLEAN),
     TOURNEY_PARTICIPATION_DAILY_TASK_REWARD_CLAIMED("tourney_participation_task_reward_claimed", AttribType.BOOLEAN),
 
-    //PvM tasks
+    // PvM tasks
     DAILY_RAIDS_DAILY_TASK_COMPLETION_AMOUNT("daily_raids_task_completion_amount", AttribType.INTEGER),
     WORLD_BOSS_DAILY_TASK_COMPLETION_AMOUNT("daily_world_bosses_task_completion_amount", AttribType.INTEGER),
     DAILY_REVENANTS_TASK_COMPLETION_AMOUNT("daily_revs_task_completion_amount", AttribType.INTEGER),
@@ -377,7 +389,8 @@ public enum AttributeKey {
     WILDERNESS_BOSS_DAILY_TASK_COMPLETION_AMOUNT("daily_wildy_bosses_task_completion_amount", AttribType.INTEGER),
     ZULRAH_DAILY_TASK_COMPLETION_AMOUNT("daily_zulrah_task_completion_amount", AttribType.INTEGER),
     SLAYER_DAILY_TASK_COMPLETION_AMOUNT("daily_slayer_task_completion_amount", AttribType.INTEGER),
-    CORRUPTED_NECHRYARCHS_DAILY_TASK_COMPLETION_AMOUNT("daily_corrupted_nechs_task_completion_amount", AttribType.INTEGER),
+    CORRUPTED_NECHRYARCHS_DAILY_TASK_COMPLETION_AMOUNT("daily_corrupted_nechs_task_completion_amount",
+            AttribType.INTEGER),
     VORKATH_DAILY_TASK_COMPLETION_AMOUNT("daily_vorky_task_completion_amount", AttribType.INTEGER),
     CORPOREAL_BEAST_DAILY_TASK_COMPLETION_AMOUNT("daily_corp_task_completion_amount", AttribType.INTEGER),
 
@@ -403,7 +416,7 @@ public enum AttributeKey {
     VORKATH_DAILY_TASK_REWARD_CLAIMED("daily_vorky_task_reward_claimed", AttribType.BOOLEAN),
     CORPOREAL_BEAST_DAILY_TASK_REWARD_CLAIMED("daily_corp_task_reward_claimed", AttribType.BOOLEAN),
 
-    //Other tasks
+    // Other tasks
     WILDY_RUNNER_DAILY_TASK_COMPLETION_AMOUNT("wildy_runner_task_completion_amount", AttribType.INTEGER),
 
     WILDY_RUNNER_DAILY_TASK_COMPLETED("wildy_runner_task_completed", AttribType.BOOLEAN),
@@ -414,10 +427,12 @@ public enum AttributeKey {
 
     BOSS_POINTS("boss_points", AttribType.INTEGER),
 
-    // The original amount being listed for this specific listing. (Before any edits were done)
+    // The original amount being listed for this specific listing. (Before any edits
+    // were done)
     TRADING_POST_ORIGINAL_AMOUNT,
 
-    // The original price being listed for this specific listing. (Before any edits were done)
+    // The original price being listed for this specific listing. (Before any edits
+    // were done)
     TRADING_POST_ORIGINAL_PRICE,
 
     RAIDS_NO_POINTS("raids_no_points", AttribType.BOOLEAN),
@@ -482,7 +497,8 @@ public enum AttributeKey {
     IN_ANTIRAG_ZONE,
 
     /**
-     * Key used in scorpia's combat script to define whether the minions had been spawned.
+     * Key used in scorpia's combat script to define whether the minions had been
+     * spawned.
      */
     SCORPIA_GUARDIANS_SPAWNED,
 
@@ -519,12 +535,14 @@ public enum AttributeKey {
 
     /**
      * The last person we attacked. Required for the PvP world PJ mechanic.
-     * - NOTE: this different from the TARGET attribute, as TARGET is cancelled/removed in various situations or when you change targets.
+     * - NOTE: this different from the TARGET attribute, as TARGET is
+     * cancelled/removed in various situations or when you change targets.
      */
     LAST_TARGET,
 
     /**
-     * Time (MS) when a player was last attacked. This is when an attack is initated (animation) NOT when damage appears.
+     * Time (MS) when a player was last attacked. This is when an attack is initated
+     * (animation) NOT when damage appears.
      * Used in checking for in/out of combat.
      */
     LAST_WAS_ATTACKED_TIME,
@@ -608,35 +626,35 @@ public enum AttributeKey {
     TITLE("title", AttribType.STRING),
     TITLE_COLOR("title_colour", AttribType.STRING),
 
-    //Divine bastion potion attributes
+    // Divine bastion potion attributes
     DIVINE_BASTION_POTION_TICKS("divine_bastion_potion_time_elapsed", AttribType.INTEGER),
     DIVINE_BASTION_POTION_EFFECT_ACTIVE("divine_bastion_potion_effect_active", AttribType.BOOLEAN),
 
-    //Divine battlemage potion attributes
+    // Divine battlemage potion attributes
     DIVINE_BATTLEMAGE_POTION_TICKS,
     DIVINE_BATTLEMAGE_POTION_EFFECT_ACTIVE,
 
-    //Divine magic potion attributes
+    // Divine magic potion attributes
     DIVINE_MAGIC_POTION_TICKS,
     DIVINE_MAGIC_POTION_EFFECT_ACTIVE,
 
-    //Divine ranging potion attributes
+    // Divine ranging potion attributes
     DIVINE_RANGING_POTION_TICKS,
     DIVINE_RANGING_POTION_EFFECT_ACTIVE,
 
-    //Divine super attack potion attributes
+    // Divine super attack potion attributes
     DIVINE_SUPER_ATTACK_POTION_TICKS,
     DIVINE_SUPER_ATTACK_POTION_EFFECT_ACTIVE,
 
-    //Divine super combat potion attributes
+    // Divine super combat potion attributes
     DIVINE_SUPER_COMBAT_POTION_TICKS,
     DIVINE_SUPER_COMBAT_POTION_EFFECT_ACTIVE,
 
-    //Divine super defence potion attributes
+    // Divine super defence potion attributes
     DIVINE_SUPER_DEFENCE_POTION_TICKS,
     DIVINE_SUPER_DEFENCE_POTION_EFFECT_ACTIVE,
 
-    //Divine super strength potion attributes
+    // Divine super strength potion attributes
     DIVINE_SUPER_STRENGTH_POTION_TICKS,
     DIVINE_SUPER_STRENGTH_POTION_EFFECT_ACTIVE,
 
@@ -755,7 +773,8 @@ public enum AttributeKey {
     COMBAT_MAXED("combat_maxed", AttribType.BOOLEAN),
 
     /**
-     * Boolean key indicating if the account was freshly made (used for introductory dialogue).
+     * Boolean key indicating if the account was freshly made (used for introductory
+     * dialogue).
      */
     NEW_ACCOUNT("new_account", AttribType.BOOLEAN),
 
@@ -791,8 +810,10 @@ public enum AttributeKey {
     ONE_HIT_MOB("one_hit_mobs", AttribType.BOOLEAN),
 
     /*
-     * Used for hunter. The exact instances of MapObjs change, however the attributes
-     * are retained (copied from source to destination) for new mapobj instances, so we'll
+     * Used for hunter. The exact instances of MapObjs change, however the
+     * attributes
+     * are retained (copied from source to destination) for new mapobj instances, so
+     * we'll
      * use this an an identifier.
      */
     MAPOBJ_UUID,
@@ -802,23 +823,27 @@ public enum AttributeKey {
      */
     JAIL_ORES_MINED("jailOresMined", AttribType.INTEGER),
 
-    // It can take from time to run somewhere on the eco server, so let's put them back where they were before getting jailed :)
+    // It can take from time to run somewhere on the eco server, so let's put them
+    // back where they were before getting jailed :)
     LOC_BEFORE_JAIL,
 
     // If we are jailed.
     JAILED("jailed", AttribType.INTEGER),
 
-    // Required total of ores to mine before you can escape jail. So you can specify per offense.
+    // Required total of ores to mine before you can escape jail. So you can specify
+    // per offense.
     JAIL_ORES_TO_ESCAPE("jail_ores_to_escape", AttribType.INTEGER),
 
-    // How many cycles remain for this venom task. NOT game cycle. One venom cycle = 20 game ticks
+    // How many cycles remain for this venom task. NOT game cycle. One venom cycle =
+    // 20 game ticks
     VENOM_TICKS("venom_ticks", AttribType.INTEGER),
 
-    //The mob that venomed us
+    // The mob that venomed us
     VENOMED_BY,
 
     /**
-     * Key used in fishing to indicate which tiles an npc may use. Type: Array<Tile>.
+     * Key used in fishing to indicate which tiles an npc may use. Type:
+     * Array<Tile>.
      */
     POSSIBLE_FISH_TILES,
 
@@ -836,9 +861,12 @@ public enum AttributeKey {
     DROP_ITEMS_WARNING_VALUE("drop_items_warning_value", AttribType.INTEGER),
 
     /**
-     * Each amulet begins with five charges. While the amulet is equipped, there is a 5% chance that you will
-     * create a 4-dose potion rather than a 3-dose potion when brewing potions (but with no extra experience),
-     * which consumes one charge. Once all of the amulet's charges are used up, the amulet crumbles to dust.
+     * Each amulet begins with five charges. While the amulet is equipped, there is
+     * a 5% chance that you will
+     * create a 4-dose potion rather than a 3-dose potion when brewing potions (but
+     * with no extra experience),
+     * which consumes one charge. Once all of the amulet's charges are used up, the
+     * amulet crumbles to dust.
      */
     AMULET_OF_CHEMISTRY_CHARGES,
 
@@ -848,23 +876,26 @@ public enum AttributeKey {
     PET_TYPE,
 
     /**
-     * Player key used to link a pet to a player. If set, it will be an NPC that follows this player.
+     * Player key used to link a pet to a player. If set, it will be an NPC that
+     * follows this player.
      */
     ACTIVE_PET,
 
     /**
-     * The Item ID of our active pet, saved over logout, so we can respawn it on login.
+     * The Item ID of our active pet, saved over logout, so we can respawn it on
+     * login.
      */
     ACTIVE_PET_ITEM_ID("active_pet_item_id", AttribType.INTEGER),
 
-    //Determines if this is a reanimated NPC spawned through the Arceuus spellbook
+    // Determines if this is a reanimated NPC spawned through the Arceuus spellbook
     IS_REANIMATED_MONSTER,
 
-    //Determines if our player has already spawned a reanimated NPC
+    // Determines if our player has already spawned a reanimated NPC
     HAS_REANIMATED_MONSTER,
 
     /**
-     * The direction (can be diagonal) which we are facing after our next move this game cycle has been established and set in Player Updating.
+     * The direction (can be diagonal) which we are facing after our next move this
+     * game cycle has been established and set in Player Updating.
      * This direction is then sent when a new entity is added to our local list :)
      */
     FACING_DIRECTION,
@@ -980,7 +1011,7 @@ public enum AttributeKey {
     CRAFTABLE_KEY,
     FLETCHABLE_KEY,
 
-    //Perk attributes
+    // Perk attributes
     PERK_STORE_BUTTON("perk_store_button", AttribType.INTEGER),
     PRESERVE("preserve", AttribType.BOOLEAN),
     RIGOUR("rigour", AttribType.BOOLEAN),
@@ -991,17 +1022,20 @@ public enum AttributeKey {
     DROP_DISPLAY_KEY,
 
     /**
-     * Key used to have a 0..100 value which holds the current prayer incremental status to have sub-tick increments.
+     * Key used to have a 0..100 value which holds the current prayer incremental
+     * status to have sub-tick increments.
      */
     PRAYERINCREMENT,
 
     /**
-     * Key used to have a 0..100 value which holds the current prayer incremental status to have sub-tick increments.
+     * Key used to have a 0..100 value which holds the current prayer incremental
+     * status to have sub-tick increments.
      */
     PRAYERINCREMENT_CURSES,
 
     /**
-     * Tick/cycle number - prayer doesn't drain the 1st tick of being active. Allows flicking
+     * Tick/cycle number - prayer doesn't drain the 1st tick of being active. Allows
+     * flicking
      */
     PRAYER_ON_TICK,
 
@@ -1023,7 +1057,8 @@ public enum AttributeKey {
     VOTE_POINS("vote_points", AttribType.INTEGER),
 
     /**
-     * Key used in callisto combat which keeps track of when to use the healing when he gets hit.
+     * Key used in callisto combat which keeps track of when to use the healing when
+     * he gets hit.
      */
     CALLISTO_DMG_HEAL,
 
@@ -1044,7 +1079,8 @@ public enum AttributeKey {
     SKULL_CYCLES("skull_cycles", AttribType.INTEGER),
 
     /**
-     * A map containing player.id : game cycle # when you began attacking someone. Used to stop rushing, such as using special 16 ticks after initiating combat.
+     * A map containing player.id : game cycle # when you began attacking someone.
+     * Used to stop rushing, such as using special 16 ticks after initiating combat.
      */
     PVP_WILDY_AGGRESSION_TRACKER,
 
@@ -1100,7 +1136,7 @@ public enum AttributeKey {
 
     // A map linking minions together used in group respawning.
     MINION_LIST,
-    
+
     /**
      * Key used to keep track of how far in the gnome course we are.
      */
@@ -1222,7 +1258,8 @@ public enum AttributeKey {
     // Item instance
     TO_ITEM,
 
-    // The interface and child id of a spell when used on an entity. For interactions.
+    // The interface and child id of a spell when used on an entity. For
+    // interactions.
     INTERACTED_WIDGET_INFO,
 
     BUTTON_SLOT,
@@ -1246,7 +1283,8 @@ public enum AttributeKey {
     INTERACTION_OBJECT,
 
     /**
-     * Key used to indicate which map object we interacted with, before it was overwritten by Jak's odd system.
+     * Key used to indicate which map object we interacted with, before it was
+     * overwritten by Jak's odd system.
      */
     ORIGINAL_INTERACTION_OBJECT,
 
@@ -1275,12 +1313,14 @@ public enum AttributeKey {
     PLAYER_DEATHS("player_deaths", AttribType.INTEGER),
 
     /**
-     * The player that owns this very NPC spawn. Think of barrows brothers, or animated armours.
+     * The player that owns this very NPC spawn. Think of barrows brothers, or
+     * animated armours.
      */
     OWNING_PLAYER,
 
     /**
-     * Tracks the instance which 'owns' an entity - such as the Kraken boss owns its minions.
+     * Tracks the instance which 'owns' an entity - such as the Kraken boss owns its
+     * minions.
      */
     BOSS_OWNER,
 
@@ -1310,7 +1350,6 @@ public enum AttributeKey {
     MELEE_DAMAGE("melee_dmg", AttribType.INTEGER),
     MAGIC_DAMAGE("magic_dmg", AttribType.INTEGER),
 
-
     // the perk used to toggle the ROL effect from the cape
     DEFENCE_PERK_TOGGLE("defence_perk_toggle", AttribType.INTEGER),
 
@@ -1328,12 +1367,14 @@ public enum AttributeKey {
     KILLSTREAK("killstreak", AttribType.INTEGER),
 
     /**
-     * Highest shutdown player ever achieved. Doesn't get replaced unless it's superceded.
+     * Highest shutdown player ever achieved. Doesn't get replaced unless it's
+     * superceded.
      */
     KILLSTREAK_RECORD("ksrec", AttribType.INTEGER),
 
     /**
-     * The highest shutdown this player has ever achieved. Does not get cleared upon death and is permanent until it's superceded.
+     * The highest shutdown this player has ever achieved. Does not get cleared upon
+     * death and is permanent until it's superceded.
      */
     SHUTDOWN_RECORD("sdrec", AttribType.INTEGER),
 
@@ -1347,7 +1388,8 @@ public enum AttributeKey {
      */
     ALLTIME_DEATHS("alltime_deaths", AttribType.INTEGER),
 
-    // The total amount of blood money (w2) risked including our +1 when entering the wilderness. Anti-rag mechanic.
+    // The total amount of blood money (w2) risked including our +1 when entering
+    // the wilderness. Anti-rag mechanic.
     RISKED_WEALTH("risked_wealth", AttribType.LONG),
 
     // Wealth total of untradeables that you keep under 20 wild, >= 20 you lose em!
@@ -1393,7 +1435,7 @@ public enum AttributeKey {
     KC_DARKBEAST("npckc36", AttribType.INTEGER),
     KC_SMOKEDEVIL("npckc37", AttribType.INTEGER),
     SUPERIOR("npckc38", AttribType.INTEGER),
-    BRUTAL_BLACK_DRAGON ("npckc39", AttribType.INTEGER),
+    BRUTAL_BLACK_DRAGON("npckc39", AttribType.INTEGER),
     FOSSIL_WYVERN("npckc40", AttribType.INTEGER),
     WYRM("npckc42", AttribType.INTEGER),
     DRAKE("npckc43", AttribType.INTEGER),
@@ -1521,8 +1563,10 @@ public enum AttributeKey {
     TOTAL_RARES_FROM_MYSTERY_BOX("total_rares_from_mystery_box", AttribType.INTEGER),
     FILLER_AMT, RC_DIALOGUE, RUNECRAFTING,
     VENOM_TASK_RUNNING, PRAYER_DELAYED_ACTIVATION_TASK, PRAYER_DELAYED_ACTIVATION_CLICKS, MOVEMENT_PACKET_STEPS,
-    IS_BOT, OVERLOAD_TASK_RUNNING, ANTIFIRE_TASK_RUNNING, DIVINE_BASTION_POTION_TASK_RUNNING, DIVINE_BATTLEMAGE_POTION_TASK_RUNNING, DIVINE_RANGING_POTION_TASK_RUNNING,
-    DIVINE_SUPER_ATTACK_POTION_TASK_RUNNING, DIVINE_SUPER_STRENGTH_POTION_TASK_RUNNING, DIVINE_SUPER_DEFENCE_POTION_TASK_RUNNING, DIVINE_SUPER_COMBAT_POTION_TASK_RUNNING,
+    IS_BOT, OVERLOAD_TASK_RUNNING, ANTIFIRE_TASK_RUNNING, DIVINE_BASTION_POTION_TASK_RUNNING,
+    DIVINE_BATTLEMAGE_POTION_TASK_RUNNING, DIVINE_RANGING_POTION_TASK_RUNNING,
+    DIVINE_SUPER_ATTACK_POTION_TASK_RUNNING, DIVINE_SUPER_STRENGTH_POTION_TASK_RUNNING,
+    DIVINE_SUPER_DEFENCE_POTION_TASK_RUNNING, DIVINE_SUPER_COMBAT_POTION_TASK_RUNNING,
 
     DIVINE_MAGIC_POTION_TASK_RUNNING, CACHED_PROJECTILE_STATE, POISON_TASK_RUNNING,
     LOGOUT_CLICKED,
@@ -1534,7 +1578,8 @@ public enum AttributeKey {
     LAST_GAMBLE_REQUEST,
     ELEMENTAL_BOW_SPECIAL_COOLDOWN,
 
-    // Attribute used by doors/gates to record what cycles they were opened/closed on.
+    // Attribute used by doors/gates to record what cycles they were opened/closed
+    // on.
     DOOR_USES,
 
     KILLING_BLOW_HIT,
@@ -1560,15 +1605,16 @@ public enum AttributeKey {
     ZERKER_MELEE_PRESET,
     PURE_MELEE_PRESET, MAIN_MELEE_PRESET, PRESET_SAVE_ONE,
     CUSTOM_PRESETS, LAST_PRESET_BUTTON_CLICKED,
-    MAIN_MELEE,ZERKER_MELEE,PURE_MELEE,
-    MAIN_TRIBRID,ZERKER_TRIBRID,
-    PURE_TRIBRID,MAIN_HYBRID,ZERKER_HYBRID, CHOKED, INVULNERABLE, RESISTANCE, TITANIUM, PRECISION,
+    MAIN_MELEE, ZERKER_MELEE, PURE_MELEE,
+    MAIN_TRIBRID, ZERKER_TRIBRID,
+    PURE_TRIBRID, MAIN_HYBRID, ZERKER_HYBRID, CHOKED, INVULNERABLE, RESISTANCE, TITANIUM, PRECISION,
 
     DOOR_ORIG_ID,
 
     STARTER_BOW_CHARGES,
     STARTER_STAFF_CHARGES,
-    STARTER_SWORD_CHARGES, SIGIL_OF_STAMINA, SIGIL_OF_ALCHEMANIAC, ALCHEMANIAC_BOOST, SIGIL_OF_EXAGGERATION, EXAGGERATION_BOOST, SIGIL_OF_DEVOTION, DEVOTION, SIGIL_OF_LAST_RECALL,
+    STARTER_SWORD_CHARGES, SIGIL_OF_STAMINA, SIGIL_OF_ALCHEMANIAC, ALCHEMANIAC_BOOST, SIGIL_OF_EXAGGERATION,
+    EXAGGERATION_BOOST, SIGIL_OF_DEVOTION, DEVOTION, SIGIL_OF_LAST_RECALL,
     PREVIOUS_SLAYER_TASK("previous_slayer_task", AttribType.STRING),
     SLAYER_TASK_UID("slayer_task_uid", AttribType.INTEGER),
     SLAYER_TASK_AMOUNT_REMAINING("slayer_task_amount_remaining", AttribType.INTEGER),
@@ -1582,6 +1628,7 @@ public enum AttributeKey {
     AttributeKey() {
 
     }
+
     AttributeKey(String name, AttribType persistType) {
         this.saveName = name;
         this.type = persistType;

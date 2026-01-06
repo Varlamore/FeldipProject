@@ -11,28 +11,31 @@ import static org.apache.logging.log4j.util.Unbox.box;
 
 /**
  * @author Origin
- * mei 05, 2020
+ *         mei 05, 2020
  */
 public class ItemOnObject {
 
     private static final Logger logger = LogManager.getLogger(ItemOnObject.class);
 
     public static void itemOnObject(Player player, Item item, GameObject object) {
-        //If the object doesn't exist, we probably shouldn't do anything about it.
+        // If the object doesn't exist, we probably shouldn't do anything about it.
         if (object == null) {
             return;
         }
 
         if (object.definition() == null) {
-            logger.error("ObjectDefinition for object {} is null for player " + player.toString() + ".", box(object.getId()));
+            logger.error("ObjectDefinition for object {} is null for player " + player.toString() + ".",
+                    box(object.getId()));
             return;
         }
 
-        if (PacketInteractionManager.checkItemOnObjectInteraction(player, item, object)) {
+        if (player.getFarmingSystem().plant(item.getId(), object.tile().x, object.tile().y)) {
             return;
         }
 
-        player.getFarming().handleItemOnObject(item.getId(), object.tile().x, object.tile().y);
+        if (player.getFarmingSystem().handleItemOnObject(item.getId(), object.tile().x, object.tile().y)) {
+            return;
+        }
 
         player.message("Nothing interesting happens.");
     }

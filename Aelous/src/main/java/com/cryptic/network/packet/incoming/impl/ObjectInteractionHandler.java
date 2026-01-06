@@ -118,7 +118,8 @@ public class ObjectInteractionHandler implements PacketListener {
         player.stopActions(false);
         player.putAttrib(AttributeKey.INTERACTION_OBJECT, object);
         player.putAttrib(AttributeKey.INTERACTION_OPTION, option);
-        BooleanSupplier next_to_object = () -> player.tile().nextTo(new Tile(object.getX(), object.getY(), object.getZ()));
+        BooleanSupplier next_to_object = () -> player.tile()
+                .nextTo(new Tile(object.getX(), object.getY(), object.getZ()));
         player.getRouteFinder().routeObject(object, () -> player.waitUntil(next_to_object, () -> {
             int sizeX = object.definition().sizeX;
             int sizeY = object.definition().sizeY;
@@ -134,7 +135,8 @@ public class ObjectInteractionHandler implements PacketListener {
     private void handleAction(Player player, GameObject object, int option) {
         player.getClickDelay().reset();
         if (object == null || object.definition() == null) {
-            logger.error("ObjectDefinition for object {} is null for player " + player.toString() + ".", box(Objects.requireNonNull(object).getId()));
+            logger.error("ObjectDefinition for object {} is null for player " + player.toString() + ".",
+                    box(Objects.requireNonNull(object).getId()));
             return;
         }
 
@@ -159,19 +161,22 @@ public class ObjectInteractionHandler implements PacketListener {
             return;
         }
 
-        final boolean bank = object.getId() == OPEN_CHEST_3194 || name.equalsIgnoreCase("Bank booth") || name.equalsIgnoreCase("Bank chest") || name.equalsIgnoreCase("Grand Exchange booth");
+        final boolean bank = object.getId() == OPEN_CHEST_3194 || name.equalsIgnoreCase("Bank booth")
+                || name.equalsIgnoreCase("Bank chest") || name.equalsIgnoreCase("Grand Exchange booth");
 
         switch (option) {
             case 1 -> {
-                player.getFarming().handleObjectClick(object.tile().x, object.tile().y, 1);
+                player.getFarmingSystem().handleObjectClick(object.tile().x, object.tile().y, 1);
 
                 if (name.equalsIgnoreCase("anvil")) {
                     if (object.tile().equals(2794, 2793)) {
                         player.smartPathTo(object.tile());
-                        player.waitUntil(1, () -> !player.getMovementQueue().isMoving(), () -> EquipmentMaking.openInterface(player));
+                        player.waitUntil(1, () -> !player.getMovementQueue().isMoving(),
+                                () -> EquipmentMaking.openInterface(player));
                     } else if (object.tile().equals(3343, 9652)) {
                         player.smartPathTo(object.tile());
-                        player.waitUntil(1, () -> !player.getMovementQueue().isMoving(), () -> EquipmentMaking.openInterface(player));
+                        player.waitUntil(1, () -> !player.getMovementQueue().isMoving(),
+                                () -> EquipmentMaking.openInterface(player));
                     } else
                         EquipmentMaking.openInterface(player);
                     return;
@@ -196,7 +201,8 @@ public class ObjectInteractionHandler implements PacketListener {
                 }
 
                 if (name.equalsIgnoreCase("furnace")) {
-                    Arrays.stream(Bar.values()).forEach(b -> player.getPacketSender().sendInterfaceModel(b.getFrame(), 150, b.getBar()));
+                    Arrays.stream(Bar.values())
+                            .forEach(b -> player.getPacketSender().sendInterfaceModel(b.getFrame(), 150, b.getBar()));
                     player.getPacketSender().sendChatboxInterface(2400);
                     return;
                 }
@@ -204,20 +210,21 @@ public class ObjectInteractionHandler implements PacketListener {
                 player.getPacketSender().sendMessage("Nothing interesting happens.");
             }
             case 2 -> {
-                player.getFarming().handleObjectClick(object.tile().x, object.tile().y, 2);
+                player.getFarmingSystem().handleObjectClick(object.tile().x, object.tile().y, 2);
                 if (bank) {
                     player.getBank().open();
                     return;
                 }
 
-                   if (object.getId() == 31923) {
+                if (object.getId() == 31923) {
                     player.animate(new Animation(645));
                     MagicSpellbook.changeSpellbook(player, MagicSpellbook.ANCIENTS, true);
                     return;
                 }
 
                 if (name.equalsIgnoreCase("furnace")) {
-                    Arrays.stream(Bar.values()).forEach(b -> player.getPacketSender().sendInterfaceModel(b.getFrame(), 150, b.getBar()));
+                    Arrays.stream(Bar.values())
+                            .forEach(b -> player.getPacketSender().sendInterfaceModel(b.getFrame(), 150, b.getBar()));
                     player.getPacketSender().sendChatboxInterface(2400);
                     return;
                 }
@@ -225,7 +232,7 @@ public class ObjectInteractionHandler implements PacketListener {
                 player.getPacketSender().sendMessage("Nothing interesting happens.");
             }
             case 3 -> {
-                player.getFarming().handleObjectClick(object.tile().x, object.tile().y, 3);
+                player.getFarmingSystem().handleObjectClick(object.tile().x, object.tile().y, 3);
                 if (name.equalsIgnoreCase("Grand Exchange booth")) {
                     TradingPost.open(player);
                     player.getPacketSender().sendConfig(1406, 0);

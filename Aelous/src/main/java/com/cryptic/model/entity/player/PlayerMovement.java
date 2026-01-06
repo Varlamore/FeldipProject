@@ -46,7 +46,7 @@ public class PlayerMovement extends MovementQueue {
         player.setRunningDirection(Direction.NONE);
         if (following != null) {
             if (!following.isRegistered() || !following.tile().isWithinDistance(player.tile())) {
-                //player.setPositionToFace(null);
+                // player.setPositionToFace(null);
                 following = null;
             } else {
                 int destX, destY;
@@ -60,14 +60,16 @@ public class PlayerMovement extends MovementQueue {
                 }
 
                 if (destX == -1 || destY == -1) {
-                    final Tile walkable = RouteFinder.findWalkable(following.getX(), following.getY(), following.getZ());
+                    final Tile walkable = RouteFinder.findWalkable(following.getX(), following.getY(),
+                            following.getZ());
                     following.getMovement().lastFollowX = following.getMovement().followX = destX = walkable.x;
                     following.getMovement().lastFollowY = following.getMovement().followY = destY = walkable.y;
                 }
                 player.smartPathTo(new Tile(destX, destY)); // supports running
             }
         }
-        //System.out.println(Arrays.toString(stepsX).substring(0, 30)+", "+Arrays.toString(stepsY).substring(0, 30));
+        // System.out.println(Arrays.toString(stepsX).substring(0, 30)+",
+        // "+Arrays.toString(stepsY).substring(0, 30));
         if (!step(player)) {
             player.updateRunEnergy();
             return;
@@ -91,7 +93,7 @@ public class PlayerMovement extends MovementQueue {
         int diffX = player.tile().getX() - player.getPreviousTile().getX();
         int diffY = player.tile().getY() - player.getPreviousTile().getY();
 
-        //System.out.println("diffX " + diffX + " diffY " + diffY+" "+isRunning());
+        // System.out.println("diffX " + diffX + " diffY " + diffY+" "+isRunning());
         lastFollowX = followX;
         lastFollowY = followY;
         followX = player.getPreviousTile().getX();
@@ -102,7 +104,7 @@ public class PlayerMovement extends MovementQueue {
             followX--;
         if (diffY >= 2)
             followY++;
-        else if (diffY <=-2)
+        else if (diffY <= -2)
             followY--;
 
         handleRegionChange();
@@ -124,8 +126,12 @@ public class PlayerMovement extends MovementQueue {
      * @param entity
      * @return
      */
-    public boolean isFollowing(Entity entity) {
+    public boolean isFollowing() {
         return following != null;
+    }
+
+    public boolean isFollowing(Entity entity) {
+        return following == entity;
     }
 
     public void resetFollowing() {
@@ -133,7 +139,9 @@ public class PlayerMovement extends MovementQueue {
     }
 
     public boolean movementPacketThisCycle() {
-        return player.isPlayer() && Optional.ofNullable(player.<Deque<Tile>>getAttribOr(AttributeKey.MOVEMENT_PACKET_STEPS, null)).map(v -> v != null ? v.peekLast() : null).orElse(null) != null;
+        return player.isPlayer()
+                && Optional.ofNullable(player.<Deque<Tile>>getAttribOr(AttributeKey.MOVEMENT_PACKET_STEPS, null))
+                        .map(v -> v != null ? v.peekLast() : null).orElse(null) != null;
     }
 
     public void handleRegionChange() {

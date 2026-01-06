@@ -19,7 +19,7 @@ public class Varps {
     }
 
     private final Player player;
-    private final int[] varps = new int[4000];
+    private final int[] varps = new int[15000];
 
     public Varps(Player player) {
         this.player = player;
@@ -35,7 +35,8 @@ public class Varps {
     }
 
     /**
-     * Returns the full varp integer value rather than a specific varbit whom's integer value contains multiple shifts representing different effects.
+     * Returns the full varp integer value rather than a specific varbit whom's
+     * integer value contains multiple shifts representing different effects.
      * Some varbits take a full 32-bit integer so you can use it.
      *
      * @param id
@@ -46,7 +47,8 @@ public class Varps {
     }
 
     /**
-     * Sets the value of a varp using the given varbit definition id. Varbit contains shift values.
+     * Sets the value of a varp using the given varbit definition id. Varbit
+     * contains shift values.
      *
      * @param id varbit definition id
      * @param v  value
@@ -57,7 +59,7 @@ public class Varps {
             int area = BIT_SIZES[def.endbit - def.startbit] << def.startbit;
             varps[def.varp] = (varps[def.varp] & (~area)) | v << def.startbit & area;
             sync(def.varp);
-        } //what is the index in syncnonzero?
+        } // what is the index in syncnonzero?
     }
 
     public static int updateValue(int old, int BITSIZE, int newval, int shift) {
@@ -110,7 +112,7 @@ public class Varps {
     }
 
     public void syncNonzero() {
-        for (int i = 0; i < 4000; i++) {
+        for (int i = 0; i < 15000; i++) {
             if (varps[i] != 0)
                 sync(i);
         }

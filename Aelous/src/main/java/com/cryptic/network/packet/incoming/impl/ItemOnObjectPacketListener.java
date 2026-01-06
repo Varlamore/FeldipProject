@@ -28,7 +28,7 @@ public class ItemOnObjectPacketListener implements PacketListener {
     @Override
     public void handleMessage(Player player, Packet packet) {
         int interfaceType = packet.readShort();
-        final int objectId = packet.readUnsignedShort();//bigger value 32k becomes 65k
+        final int objectId = packet.readUnsignedShort();// bigger value 32k becomes 65k
         final int objectY = packet.readLEShortA();
         final int slot = packet.readLEShort();
         final int objectX = packet.readLEShortA();
@@ -37,10 +37,12 @@ public class ItemOnObjectPacketListener implements PacketListener {
         Tile tile = new Tile(objectX, objectY, player.tile().getLevel());
         Optional<GameObject> object = MapObjects.get(objectId, tile);
 
-        //Make sure the object actually exists in the region...
+        // Make sure the object actually exists in the region...
         if (object.isEmpty()) {
-           // logger.info("Object with id {} does not exist for player " + player.toString() + "!", box(objectId));
-            //Utils.sendDiscordErrorLog("Object with id " + objectId + " does not exist for player " + player.toString() + "!");
+            // logger.info("Object with id {} does not exist for player " +
+            // player.toString() + "!", box(objectId));
+            // Utils.sendDiscordErrorLog("Object with id " + objectId + " does not exist for
+            // player " + player.toString() + "!");
             return;
         }
 
@@ -58,7 +60,6 @@ public class ItemOnObjectPacketListener implements PacketListener {
             player.putAttrib(AttributeKey.ITEM_SLOT, slot);
             player.putAttrib(AttributeKey.ITEM_ID, itemId);
             player.putAttrib(AttributeKey.FROM_ITEM, item);
-
 
             final int sizeX = object.get().definition().sizeX;
             final int sizeY = object.get().definition().sizeY;
@@ -90,7 +91,7 @@ public class ItemOnObjectPacketListener implements PacketListener {
                     return;
                 }
 
-                //occult altar
+                // occult altar
                 if (gameObject.getId() == 29150 && player.tile().distance(gameObject.tile()) <= 2) {
                     ItemOnObject.itemOnObject(player, item, gameObject);
                 }
@@ -99,6 +100,7 @@ public class ItemOnObjectPacketListener implements PacketListener {
                     ItemOnObject.itemOnObject(player, item, gameObject);
                 } else {
                     player.getRouteFinder().routeObject(gameObject, () -> {
+                        player.setPositionToFace(position);
                         ItemOnObject.itemOnObject(player, item, gameObject);
                     });
 

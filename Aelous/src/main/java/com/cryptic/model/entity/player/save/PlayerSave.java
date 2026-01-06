@@ -59,19 +59,29 @@ import static com.cryptic.model.inter.lootkeys.LootKey.LOOT_KEY_CONTAINER_SIZE;
 
 /**
  * Handles saving a player's container and details into a json file.
- * <br><br>
- * Type safety enforced when using OSS's {@link AttributeKey} by Shadowrs/Jak on 06/06/2020
+ * <br>
+ * <br>
+ * Type safety enforced when using OSS's {@link AttributeKey} by Shadowrs/Jak on
+ * 06/06/2020
  *
  * @author Origin | 28 feb. 2019 : 12:16:21
- * @see <a href="https://www.rune-server.ee/members/_Patrick_/">Rune-Server profile</a>
+ * @see <a href="https://www.rune-server.ee/members/_Patrick_/">Rune-Server
+ *      profile</a>
  */
 public class PlayerSave {
 
     /**
-     * SUPER IMPORTANT INFO: Player class needs to have default values set for any objects (or variables) that could be null that it tries to access on login to prevent NPEs thrown when loading a Player from PlayerSave.
-     * In other words, when adding any new variables to PlayerSave that might be accessed upon login, make sure to set default values in Player class (for existing players that don't have the new features yet).
-     * ALSO: Make super sure to be careful that when adding any new save objects (or variables) here, when loading the details, setting them here may mean they are null so they will set the Player variables to null which will cause NPEs.
-     * In other words, make sure to properly null check in the Player class and in other places throughout the server code.
+     * SUPER IMPORTANT INFO: Player class needs to have default values set for any
+     * objects (or variables) that could be null that it tries to access on login to
+     * prevent NPEs thrown when loading a Player from PlayerSave.
+     * In other words, when adding any new variables to PlayerSave that might be
+     * accessed upon login, make sure to set default values in Player class (for
+     * existing players that don't have the new features yet).
+     * ALSO: Make super sure to be careful that when adding any new save objects (or
+     * variables) here, when loading the details, setting them here may mean they
+     * are null so they will set the Player variables to null which will cause NPEs.
+     * In other words, make sure to properly null check in the Player class and in
+     * other places throughout the server code.
      */
 
     private static final Logger logger = LogManager.getLogger(PlayerSave.class);
@@ -79,12 +89,13 @@ public class PlayerSave {
     static final Map<Type, InstanceCreator<?>> instanceCreators = Collections.emptyMap();
 
     public static final Gson SERIALIZE = new GsonBuilder()
-        .setDateFormat("MMM d, yyyy, HH:mm:ss a")
-        .setPrettyPrinting()
-        .registerTypeAdapterFactory(
-            new MapTypeAdapterFactoryNulls(new ConstructorConstructor(instanceCreators, false, new ArrayList<>()), false))
-        .disableHtmlEscaping()
-        .create();
+            .setDateFormat("MMM d, yyyy, HH:mm:ss a")
+            .setPrettyPrinting()
+            .registerTypeAdapterFactory(
+                    new MapTypeAdapterFactoryNulls(
+                            new ConstructorConstructor(instanceCreators, false, new ArrayList<>()), false))
+            .disableHtmlEscaping()
+            .create();
 
     /**
      * Loads all the details of the {@code player}.
@@ -93,7 +104,7 @@ public class PlayerSave {
      */
     public static boolean load(Player player) throws Exception {
         try {
-            player.getFarming().load();
+            player.getFarmingSystem().load();
         } catch (Exception e) {
             logger.error("Error while loading farming {}", player.getUsername(), e);
             e.printStackTrace();
@@ -121,7 +132,7 @@ public class PlayerSave {
     public static boolean save(Player player) {
         try {
             new SaveDetails(player).parseDetails();
-            player.getFarming().save();
+            player.getFarmingSystem().save();
             return true;
         } catch (final Exception e) {
             logger.error("save", e);
@@ -129,7 +140,8 @@ public class PlayerSave {
         return false;
     }
 
-    private static final ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+    private static final ExecutorService executor = Executors
+            .newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
     /**
      * Handles saving and loading player's details.
@@ -201,7 +213,8 @@ public class PlayerSave {
                     for (Map.Entry<Integer, Item[]> integerEntry : details.lootKeys.entrySet()) {
                         ItemContainer ic = new ItemContainer(LOOT_KEY_CONTAINER_SIZE, ItemContainer.StackPolicy.ALWAYS);
                         ic.addAll(integerEntry.getValue());
-                        LootKey.infoForPlayer(player).keys[integerEntry.getKey()] = new LootKey(ic, ic.containerValue());
+                        LootKey.infoForPlayer(player).keys[integerEntry.getKey()] = new LootKey(ic,
+                                ic.containerValue());
                     }
                 }
             }
@@ -226,7 +239,8 @@ public class PlayerSave {
             if (details.quickPrayers != null)
                 player.getQuickPrayers().setPrayers(details.quickPrayers);
             if (details.presets != null) {
-                // put into individual slots, dont replace an array[20] with a game save array[10]
+                // put into individual slots, dont replace an array[20] with a game save
+                // array[10]
                 for (int i = 0; i < details.presets.length; i++) {
                     player.getPresets()[i] = details.presets[i];
                 }
@@ -245,7 +259,8 @@ public class PlayerSave {
             player.putAttrib(AttributeKey.LEGENDARY_MEMBER_UNLOCKED, details.legendaryMemberUnlocked);
             player.putAttrib(AttributeKey.VIP_UNLOCKED, details.vipUnlocked);
             player.putAttrib(AttributeKey.SPONSOR_UNLOCKED, details.sponsorMemberUnlocked);
-            if (details.saved_tornament_levels != null && details.saved_tornament_xp != null) player.skills().restoreLevels(details.saved_tornament_xp, details.saved_tornament_levels);
+            if (details.saved_tornament_levels != null && details.saved_tornament_xp != null)
+                player.skills().restoreLevels(details.saved_tornament_xp, details.saved_tornament_levels);
             player.getSkills().setAllLevels(details.dynamicLevels);
             player.getSkills().setAllXps(details.skillXP);
             if (details.unlockedPets != null) {
@@ -367,7 +382,8 @@ public class PlayerSave {
             player.putAttrib(AttributeKey.ALCHEMICAL_HYDRA_LOG_CLAIMED, details.alchemicalHydraLogClaimed);
             player.putAttrib(AttributeKey.ANCIENT_BARRELCHEST_LOG_CLAIMED, details.ancientBarrelchestLogClaimed);
             player.putAttrib(AttributeKey.ANCIENT_CHAOS_ELEMENTAL_LOG_CLAIMED, details.ancientChaosElementalLogClaimed);
-            player.putAttrib(AttributeKey.ANCIENT_KING_BLACK_DRAGON_LOG_CLAIMED, details.ancientKingBlackDragonLogClaimed);
+            player.putAttrib(AttributeKey.ANCIENT_KING_BLACK_DRAGON_LOG_CLAIMED,
+                    details.ancientKingBlackDragonLogClaimed);
             player.putAttrib(AttributeKey.ARACHNE_LOG_CLAIMED, details.arachneLogClaimed);
             player.putAttrib(AttributeKey.ARTIO_LOG_CLAIMED, details.artioLogClaimed);
             player.putAttrib(AttributeKey.SEREN_LOG_CLAIMED, details.serenLogClaimed);
@@ -391,7 +407,8 @@ public class PlayerSave {
             player.putAttrib(AttributeKey.SKORPIOS_LOG_CLAIMED, details.skorpiosLogClaimed);
             player.putAttrib(AttributeKey.SKOTIZO_LOG_CLAIMED, details.skotizoLogClaimed);
             player.putAttrib(AttributeKey.TEKTON_LOG_CLAIMED, details.tektonLogClaimed);
-            player.putAttrib(AttributeKey.THERMONUCLEAR_SMOKE_DEVIL_LOG_CLAIMED, details.thermonuclearSmokeDevilLogClaimed);
+            player.putAttrib(AttributeKey.THERMONUCLEAR_SMOKE_DEVIL_LOG_CLAIMED,
+                    details.thermonuclearSmokeDevilLogClaimed);
             player.putAttrib(AttributeKey.THE_NIGTHMARE_LOG_CLAIMED, details.theNightmareLogClaimed);
             player.putAttrib(AttributeKey.CORRUPTED_HUNLEFF_LOG_CLAIMED, details.corruptedHunleffLogClaimed);
             player.putAttrib(AttributeKey.MEN_IN_BLACK_LOG_CLAIMED, details.menInBlackLogClaimed);
@@ -474,19 +491,22 @@ public class PlayerSave {
                 });
                 player.setSessionVarps(varps);
             }
-            player.putAttrib(AttributeKey.DAILY_TASKS_LIST, details.dailyTasksList == null ? new ArrayList<DailyTasks>() : details.dailyTasksList);
-            player.putAttrib(AttributeKey.DAILY_TASKS_EXTENSION_LIST, details.dailyTasksExtensions == null ? new HashMap<DailyTasks, Integer>() : details.dailyTasksExtensions);
-
+            player.putAttrib(AttributeKey.DAILY_TASKS_LIST,
+                    details.dailyTasksList == null ? new ArrayList<DailyTasks>() : details.dailyTasksList);
+            player.putAttrib(AttributeKey.DAILY_TASKS_EXTENSION_LIST,
+                    details.dailyTasksExtensions == null ? new HashMap<DailyTasks, Integer>()
+                            : details.dailyTasksExtensions);
 
             ARGS_DESERIALIZER.accept(player, details.allAttribs);
 
             player.putAttrib(AttributeKey.STARTER_BOW_CHARGES, details.starterBowCharges);
             player.putAttrib(AttributeKey.STARTER_STAFF_CHARGES, details.starterStaffCharges);
             player.putAttrib(AttributeKey.STARTER_SWORD_CHARGES, details.starterSwordCharges);
-            if (details.lastRecallSave != null) player.setLastSavedTile(details.lastRecallSave.tile());
+            if (details.lastRecallSave != null)
+                player.setLastSavedTile(details.lastRecallSave.tile());
         }
 
-        //Account
+        // Account
         private final String username;
         private final String password;
         private final PlainTile tile;
@@ -503,7 +523,7 @@ public class PlayerSave {
         private final int[] looks;
         private final short[] colors;
 
-        //Combat attribs
+        // Combat attribs
         private final String spellBook;
         private final String fightType;
         private final int fightTypeVarp;
@@ -514,7 +534,8 @@ public class PlayerSave {
         @Expose
         private final HashMap<Integer, Item[]> lootKeys;
         private int lootKeysCarried;
-        @Expose private final List<AttributeKey> sigils;
+        @Expose
+        private final List<AttributeKey> sigils;
         private int totalSigilsActivated;
         private int lootKeysLooted;
         private long totalLootKeysValue;
@@ -533,7 +554,7 @@ public class PlayerSave {
         private final Object[] lastPreset;
         private final int specialTeleblockTimer;
 
-        //Member attribs
+        // Member attribs
         private final boolean memberUnlocked;
         private final boolean superMemberUnlocked;
         private final boolean eliteMemberUnlocked;
@@ -545,7 +566,7 @@ public class PlayerSave {
         public boolean infhp;
         private final HashMap<Integer, Integer> varps;
 
-        //Skills
+        // Skills
         private final double[] saved_tornament_xp;
         private final int[] saved_tornament_levels;
         private final int[] dynamicLevels;
@@ -557,7 +578,7 @@ public class PlayerSave {
         private final HashMap<Integer, String> slayerUnlocks;
         private final HashMap<Integer, String> slayerExtensionsList;
 
-        //Containers
+        // Containers
         private final Item[] inventory;
         private final Item[] equipment;
         private final Item[] bank;
@@ -576,16 +597,16 @@ public class PlayerSave {
         private final ArrayList<Item> sackOfPresentItems;
         private final ArrayList<Item> cartItems;
 
-        //Friends
+        // Friends
         private List<String> newFriends;
 
-        //Ignores
+        // Ignores
         private List<String> newIgnores;
 
-        //Clan
+        // Clan
         private final String clan;
 
-        //Settings
+        // Settings
 
         private final boolean savePresetLevels;
         private final boolean openPresetsOnDeath;
@@ -597,8 +618,7 @@ public class PlayerSave {
         private final int elFuegoKilled;
         private final int derangedArchaeologistKilled;
 
-
-        //Content
+        // Content
         private final Map<String, Integer> bossTimers;
         private final List<TeleportData> recentTeleports;
         private final List<TeleportData> favoriteTeleports;
@@ -775,7 +795,9 @@ public class PlayerSave {
             specialAttackRestoreTimer = player.getSpecialAttackRestore().secondsRemaining();
             skullType = player.getSkullType();
             quickPrayers = player.getQuickPrayers().getPrayers();
-            presets = player.getPresets();//so rest is just writing? like how do oyu write the data from presetdata in logic, you get what im saying? like how would i send it to the player? just setpresetdata in presethandler?
+            presets = player.getPresets();// so rest is just writing? like how do oyu write the data from presetdata in
+                                          // logic, you get what im saying? like how would i send it to the player? just
+                                          // setpresetdata in presethandler?
             // its already on player, player.presetsv2
             presetsv2 = player.getPresetData();
             lastPreset = player.getLastPreset();
@@ -811,8 +833,10 @@ public class PlayerSave {
             storeAsMany = player.getLootingBag().storeAsMany();
             runePouch = player.getRunePouch().toArray();
             cartItems = player.<ArrayList<Item>>getAttribOr(AttributeKey.CART_ITEMS, new ArrayList<Item>());
-            nifflerItems = player.<ArrayList<Item>>getAttribOr(AttributeKey.NIFFLER_ITEMS_STORED, new ArrayList<Item>());
-            sackOfPresentItems = player.<ArrayList<Item>>getAttribOr(AttributeKey.SACK_OF_PRESENTS_LIST, new ArrayList<Item>());
+            nifflerItems = player.<ArrayList<Item>>getAttribOr(AttributeKey.NIFFLER_ITEMS_STORED,
+                    new ArrayList<Item>());
+            sackOfPresentItems = player.<ArrayList<Item>>getAttribOr(AttributeKey.SACK_OF_PRESENTS_LIST,
+                    new ArrayList<Item>());
             newFriends = player.getRelations().getFriendList();
             newIgnores = player.getRelations().getIgnoreList();
             clan = player.getClanChat();
@@ -832,62 +856,90 @@ public class PlayerSave {
             task = player.getAttribOr(AttributeKey.TASK, Tasks.NONE);
             locBeforeJail = ((Tile) player.getAttribOr(AttributeKey.LOC_BEFORE_JAIL, new Tile(3092, 3500))).toPlain();
 
-            alchemicalHydraLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.ALCHEMICAL_HYDRA_LOG_CLAIMED, false);
-            ancientBarrelchestLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.ANCIENT_BARRELCHEST_LOG_CLAIMED, false);
-            ancientChaosElementalLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.ANCIENT_CHAOS_ELEMENTAL_LOG_CLAIMED, false);
-            ancientKingBlackDragonLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.ANCIENT_KING_BLACK_DRAGON_LOG_CLAIMED, false);
+            alchemicalHydraLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.ALCHEMICAL_HYDRA_LOG_CLAIMED,
+                    false);
+            ancientBarrelchestLogClaimed = Player.getAttribBooleanOr(player,
+                    AttributeKey.ANCIENT_BARRELCHEST_LOG_CLAIMED, false);
+            ancientChaosElementalLogClaimed = Player.getAttribBooleanOr(player,
+                    AttributeKey.ANCIENT_CHAOS_ELEMENTAL_LOG_CLAIMED, false);
+            ancientKingBlackDragonLogClaimed = Player.getAttribBooleanOr(player,
+                    AttributeKey.ANCIENT_KING_BLACK_DRAGON_LOG_CLAIMED, false);
             arachneLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.ARACHNE_LOG_CLAIMED, false);
             artioLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.ARTIO_LOG_CLAIMED, false);
             serenLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.SEREN_LOG_CLAIMED, false);
             barrelchestLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.BARRELCHEST_LOG_CLAIMED, false);
-            brutalLavaDragonLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.BRUTAL_LAVA_DRAGON_LOG_CLAIMED, false);
+            brutalLavaDragonLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.BRUTAL_LAVA_DRAGON_LOG_CLAIMED,
+                    false);
             callistoLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.CALLISTO_LOG_CLAIMED, false);
             cerberusLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.CERBERUS_LOG_CLAIMED, false);
-            chaosElementalLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.CHAOS_ELEMENTAL_LOG_CLAIMED, false);
+            chaosElementalLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.CHAOS_ELEMENTAL_LOG_CLAIMED,
+                    false);
             chaosFanaticLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.CHAOS_FANATIC_LOG_CLAIMED, false);
-            corporealBeastLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.CORPOREAL_BEAST_LOG_CLAIMED, false);
-            corruptedNechryarchLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.CORRUPTED_NECHRYARCH_LOG_CLAIMED, false);
-            crazyArchaeologistLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.CRAZY_ARCHAEOLOGIST_LOG_CLAIMED, false);
-            demonicGorillaLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.DEMONIC_GORILLA_LOG_CLAIMED, false);
+            corporealBeastLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.CORPOREAL_BEAST_LOG_CLAIMED,
+                    false);
+            corruptedNechryarchLogClaimed = Player.getAttribBooleanOr(player,
+                    AttributeKey.CORRUPTED_NECHRYARCH_LOG_CLAIMED, false);
+            crazyArchaeologistLogClaimed = Player.getAttribBooleanOr(player,
+                    AttributeKey.CRAZY_ARCHAEOLOGIST_LOG_CLAIMED, false);
+            demonicGorillaLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.DEMONIC_GORILLA_LOG_CLAIMED,
+                    false);
             giantMoleLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.GIANT_MOLE_LOG_CLAIMED, false);
             kerberosLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.KERBEROS_LOG_CLAIMED, false);
-            kingBlackDragonLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.KING_BLACK_DRAGON_LOG_CLAIMED, false);
+            kingBlackDragonLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.KING_BLACK_DRAGON_LOG_CLAIMED,
+                    false);
             krakenLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.KRAKEN_LOG_CLAIMED, false);
             lavaDragonLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.LAVA_DRAGON_LOG_CLAIMED, false);
-            lizardmanShamanLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.LIZARDMAN_SHAMAN_LOG_CLAIMED, false);
+            lizardmanShamanLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.LIZARDMAN_SHAMAN_LOG_CLAIMED,
+                    false);
             scorpiaLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.SCORPIA_LOG_CLAIMED, false);
             skorpiosLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.SKORPIOS_LOG_CLAIMED, false);
             skotizoLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.SKOTIZO_LOG_CLAIMED, false);
             tektonLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.TEKTON_LOG_CLAIMED, false);
-            thermonuclearSmokeDevilLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.THERMONUCLEAR_SMOKE_DEVIL_LOG_CLAIMED, false);
+            thermonuclearSmokeDevilLogClaimed = Player.getAttribBooleanOr(player,
+                    AttributeKey.THERMONUCLEAR_SMOKE_DEVIL_LOG_CLAIMED, false);
             theNightmareLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.THE_NIGTHMARE_LOG_CLAIMED, false);
-            corruptedHunleffLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.CORRUPTED_HUNLEFF_LOG_CLAIMED, false);
+            corruptedHunleffLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.CORRUPTED_HUNLEFF_LOG_CLAIMED,
+                    false);
             menInBlackLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.MEN_IN_BLACK_LOG_CLAIMED, false);
             tztokJadLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.TZTOK_JAD_LOG_CLAIMED, false);
             venenatisLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.VENENATIS_LOG_CLAIMED, false);
             vetionLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.VETION_LOG_CLAIMED, false);
             vorkathLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.VORKATH_LOG_CLAIMED, false);
-            zombiesChampionLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.ZOMBIES_CHAMPION_LOG_CLAIMED, false);
+            zombiesChampionLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.ZOMBIES_CHAMPION_LOG_CLAIMED,
+                    false);
             zulrahLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.ZULRAH_LOG_CLAIMED, false);
-            armourMysteryBoxLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.ARMOUR_MYSTERY_BOX_LOG_CLAIMED, false);
-            donatorMysteryBoxLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.DONATOR_MYSTERY_BOX_LOG_CLAIMED, false);
-            epicPetMysteryBoxLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.EPIC_PET_MYSTERY_BOX_LOG_CLAIMED, false);
+            armourMysteryBoxLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.ARMOUR_MYSTERY_BOX_LOG_CLAIMED,
+                    false);
+            donatorMysteryBoxLogClaimed = Player.getAttribBooleanOr(player,
+                    AttributeKey.DONATOR_MYSTERY_BOX_LOG_CLAIMED, false);
+            epicPetMysteryBoxLogClaimed = Player.getAttribBooleanOr(player,
+                    AttributeKey.EPIC_PET_MYSTERY_BOX_LOG_CLAIMED, false);
             mysteryChestLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.MYSTERY_CHEST_LOG_CLAIMED, false);
-            raidsMysteryBoxLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.RAIDS_MYSTERY_BOX_LOG_CLAIMED, false);
-            weaponMysteryBoxLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.WEAPON_MYSTERY_BOX_LOG_CLAIMED, false);
-            legendaryMysteryBoxLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.LEGENDARY_MYSTERY_BOX_LOG_CLAIMED, false);
+            raidsMysteryBoxLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.RAIDS_MYSTERY_BOX_LOG_CLAIMED,
+                    false);
+            weaponMysteryBoxLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.WEAPON_MYSTERY_BOX_LOG_CLAIMED,
+                    false);
+            legendaryMysteryBoxLogClaimed = Player.getAttribBooleanOr(player,
+                    AttributeKey.LEGENDARY_MYSTERY_BOX_LOG_CLAIMED, false);
             zenyteLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.ZENYTE_MYSTERY_BOX_LOG_CLAIMED, false);
             crystalKeyLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.CRYSTAL_KEY_LOG_CLAIMED, false);
             moltenKeyLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.MOLTEN_KEY_LOG_CLAIMED, false);
-            enchantedKeyRLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.ENCHANTED_KEY_R_LOG_CLAIMED, false);
-            enchantedKeyPLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.ENCHANTED_KEY_P_LOG_CLAIMED, false);
-            larransKeyTierILogClaimed = Player.getAttribBooleanOr(player, AttributeKey.LARRANS_KEY_TIER_I_LOG_CLAIMED, false);
-            larransKeyTierIILogClaimed = Player.getAttribBooleanOr(player, AttributeKey.LARRANS_KEY_TIER_II_LOG_CLAIMED, false);
-            larransKeyTierIIILogClaimed = Player.getAttribBooleanOr(player, AttributeKey.LARRANS_KEY_TIER_III_LOG_CLAIMED, false);
+            enchantedKeyRLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.ENCHANTED_KEY_R_LOG_CLAIMED,
+                    false);
+            enchantedKeyPLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.ENCHANTED_KEY_P_LOG_CLAIMED,
+                    false);
+            larransKeyTierILogClaimed = Player.getAttribBooleanOr(player, AttributeKey.LARRANS_KEY_TIER_I_LOG_CLAIMED,
+                    false);
+            larransKeyTierIILogClaimed = Player.getAttribBooleanOr(player, AttributeKey.LARRANS_KEY_TIER_II_LOG_CLAIMED,
+                    false);
+            larransKeyTierIIILogClaimed = Player.getAttribBooleanOr(player,
+                    AttributeKey.LARRANS_KEY_TIER_III_LOG_CLAIMED, false);
             slayerKeyLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.SLAYER_KEY_LOG_CLAIMED, false);
             wildernessKeyLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.WILDERNESS_KEY_LOG_CLAIMED, false);
-            ancientRevenantsLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.ANCIENT_REVENANTS_LOG_CLAIMED, false);
-            chamberOfSecretsLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.CHAMBER_OF_SECRETS_LOG_CLAIMED, false);
+            ancientRevenantsLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.ANCIENT_REVENANTS_LOG_CLAIMED,
+                    false);
+            chamberOfSecretsLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.CHAMBER_OF_SECRETS_LOG_CLAIMED,
+                    false);
             revenantsLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.REVENANTS_LOG_CLAIMED, false);
             slayerLogClaimed = Player.getAttribBooleanOr(player, AttributeKey.SLAYER_LOG_CLAIMED, false);
 
@@ -979,17 +1031,17 @@ public class PlayerSave {
         }
     }
 
-        public static boolean playerExists(String name) {
-            return Files.exists(SAVE_DIR.resolve(name + ".json"));
-        }
+    public static boolean playerExists(String name) {
+        return Files.exists(SAVE_DIR.resolve(name + ".json"));
+    }
 
-        public static final Path SAVE_DIR = Path.of("data", "saves", "characters");
+    public static final Path SAVE_DIR = Path.of("data", "saves", "characters");
 
-    public static BiConsumer<Player, Map<String,String>> ARGS_DESERIALIZER = (p, m) -> {
+    public static BiConsumer<Player, Map<String, String>> ARGS_DESERIALIZER = (p, m) -> {
 
     };
-    public static Function<Player, Map<String,String>> ARGS_SERIALIZER = m -> {
+    public static Function<Player, Map<String, String>> ARGS_SERIALIZER = m -> {
         return null;
     };
 
-    }
+}

@@ -49,7 +49,6 @@ import com.cryptic.model.content.raids.theatre.stage.TheatreStage;
 import com.cryptic.model.content.security.AccountPin;
 import com.cryptic.model.content.sigils.Sigil;
 import com.cryptic.model.content.skill.Skillable;
-import com.cryptic.model.content.skill.impl.farming.Farming;
 import com.cryptic.model.content.skill.impl.hunter.Hunter;
 import com.cryptic.model.content.skill.impl.slayer.SlayerRewards;
 import com.cryptic.model.content.skill.impl.slayer.slayer_partner.SlayerPartner;
@@ -219,7 +218,8 @@ public class Player extends Entity {
         return wildernessSlayerCasket;
     }
 
-    @Getter private final WildernessKeys wildernessKeys = new WildernessKeys();
+    @Getter
+    private final WildernessKeys wildernessKeys = new WildernessKeys();
 
     public WildernessKeys getWildernessKeys() {
         return wildernessKeys;
@@ -241,7 +241,7 @@ public class Player extends Entity {
             inventory.remove(item, true);
         }
 
-        //Equipment can only have one item in a slot
+        // Equipment can only have one item in a slot
         equipment.remove(item, true);
 
         int bankCount = bank.count(item.getId());
@@ -257,7 +257,8 @@ public class Player extends Entity {
 
     private Raids raids;
 
-    @Getter public BonusesInterface bonusInterface = new BonusesInterface(this);
+    @Getter
+    public BonusesInterface bonusInterface = new BonusesInterface(this);
 
     private ZarosGodwars zarosGodwars;
 
@@ -278,7 +279,8 @@ public class Player extends Entity {
     TheatreParty theatreParty;
 
     /**
-     * depending on pid, two dying players, one might respawn before other's death code runs. this introduces some leway.
+     * depending on pid, two dying players, one might respawn before other's death
+     * code runs. this introduces some leway.
      *
      * @return
      */
@@ -287,7 +289,8 @@ public class Player extends Entity {
     }
 
     public boolean deadRecently(int ticks) {
-        return dead() || (World.getWorld().cycleCount() - this.<Integer>getAttribOr(DEATH_TICK, World.getWorld().cycleCount() - 1000) <= ticks);
+        return dead() || (World.getWorld().cycleCount()
+                - this.<Integer>getAttribOr(DEATH_TICK, World.getWorld().cycleCount() - 1000) <= ticks);
     }
 
     public void heal() {
@@ -296,8 +299,10 @@ public class Player extends Entity {
         message("<col=" + Color.HOTPINK.getColorValue() + ">You've also been cured of poison and venom.");
         getSkills().resetStats();
         int increase = getEquipment().hpIncrease();
-        hp(Math.max(increase > 0 ? getSkills().level(Skills.HITPOINTS) + increase : getSkills().level(Skills.HITPOINTS), getSkills().xpLevel(Skills.HITPOINTS)), 39); //Set hitpoints to 100%
-        getSkills().replenishSkill(5, getSkills().xpLevel(5)); //Set the players prayer level to fullputAttrib(AttributeKey.RUN_ENERGY, 100.0);
+        hp(Math.max(increase > 0 ? getSkills().level(Skills.HITPOINTS) + increase : getSkills().level(Skills.HITPOINTS),
+                getSkills().xpLevel(Skills.HITPOINTS)), 39); // Set hitpoints to 100%
+        getSkills().replenishSkill(5, getSkills().xpLevel(5)); // Set the players prayer level to
+                                                               // fullputAttrib(AttributeKey.RUN_ENERGY, 100.0);
         setRunningEnergy(100.0, true);
         Poison.cure(this);
         Venom.cure(2, this);
@@ -305,16 +310,20 @@ public class Player extends Entity {
         message(Color.RED.tag() + "When being a member your special attack will also regenerate.");
         if (memberRights.isRegularMemberOrGreater(this)) {
             if (getTimers().has(TimerKey.RECHARGE_SPECIAL_ATTACK)) {
-                message("Special attack energy can be restored in " + getTimers().asMinutesAndSecondsLeft(TimerKey.RECHARGE_SPECIAL_ATTACK) + ".");
+                message("Special attack energy can be restored in "
+                        + getTimers().asMinutesAndSecondsLeft(TimerKey.RECHARGE_SPECIAL_ATTACK) + ".");
             } else {
                 restoreSpecialAttack(100);
                 setSpecialActivated(false);
                 CombatSpecial.updateBar(this);
                 int time = 0;
-                if (memberRights.isRegularMemberOrGreater(this)) time = 300;//3 minutes
-                if (memberRights.isSuperMemberOrGreater(this)) time = 100;//1 minute
-                if (memberRights.isEliteMemberOrGreater(this)) time = 0;//always
-                getTimers().register(TimerKey.RECHARGE_SPECIAL_ATTACK, time); //Set the value of the timer.
+                if (memberRights.isRegularMemberOrGreater(this))
+                    time = 300;// 3 minutes
+                if (memberRights.isSuperMemberOrGreater(this))
+                    time = 100;// 1 minute
+                if (memberRights.isEliteMemberOrGreater(this))
+                    time = 0;// always
+                getTimers().register(TimerKey.RECHARGE_SPECIAL_ATTACK, time); // Set the value of the timer.
                 message("<col=" + Color.HOTPINK.getColorValue() + ">You have restored your special attack.");
             }
         }
@@ -324,7 +333,7 @@ public class Player extends Entity {
         return username;
     }
 
-    private int[] sessionVarps = new int[4000];
+    private int[] sessionVarps = new int[15000];
 
     public int[] sessionVarps() {
         return sessionVarps;
@@ -333,9 +342,6 @@ public class Player extends Entity {
     public void setSessionVarps(int[] varps) {
         this.sessionVarps = varps;
     }
-
-    @Getter
-    private final Farming farming = new Farming(this);
 
     public static class TextData {
 
@@ -350,9 +356,9 @@ public class Player extends Entity {
         @Override
         public String toString() {
             return "TextData{" +
-                "text='" + text + '\'' +
-                ", id=" + id +
-                '}';
+                    "text='" + text + '\'' +
+                    ", id=" + id +
+                    '}';
         }
     }
 
@@ -375,21 +381,26 @@ public class Player extends Entity {
 
     public int masterCasketMemberBonus() {
         var extraPercentageChance = 0;
-        if (getMemberRights().isSponsorOrGreater(this) && tile().memberCave()) extraPercentageChance = 25;
-        else if (getMemberRights().isVIPOrGreater(this) && tile().memberCave()) extraPercentageChance = 15;
-        else if (getMemberRights().isLegendaryMemberOrGreater(this) && tile().memberCave()) extraPercentageChance = 10;
-        else if (getMemberRights().isExtremeMemberOrGreater(this) && tile().memberCave()) extraPercentageChance = 7;
-        else if (getMemberRights().isEliteMemberOrGreater(this) && tile().memberCave()) extraPercentageChance = 4;
-        else if (getMemberRights().isSuperMemberOrGreater(this) && tile().memberCave()) extraPercentageChance = 2;
+        if (getMemberRights().isSponsorOrGreater(this) && tile().memberCave())
+            extraPercentageChance = 25;
+        else if (getMemberRights().isVIPOrGreater(this) && tile().memberCave())
+            extraPercentageChance = 15;
+        else if (getMemberRights().isLegendaryMemberOrGreater(this) && tile().memberCave())
+            extraPercentageChance = 10;
+        else if (getMemberRights().isExtremeMemberOrGreater(this) && tile().memberCave())
+            extraPercentageChance = 7;
+        else if (getMemberRights().isEliteMemberOrGreater(this) && tile().memberCave())
+            extraPercentageChance = 4;
+        else if (getMemberRights().isSuperMemberOrGreater(this) && tile().memberCave())
+            extraPercentageChance = 2;
 
         return extraPercentageChance;
     }
 
     public int getPetDamageBonus(int damage) {
-        int[] PETS = new int[]
-            {
+        int[] PETS = new int[] {
                 NpcIdentifiers.CORPOREAL_CRITTER
-            };
+        };
 
         if (this.getPetEntity() != null) {
             if (this.getPetEntity().getPet() != null) {
@@ -468,13 +479,16 @@ public class Player extends Entity {
         // Double BM, if enabled. Can be toggled with ::bmm <int>. Default 1.
         bm *= World.getWorld().bmMultiplier;
 
-        //Being a trained account gives a +100 BM boost to the base value
-        if (getGameMode() == GameMode.TRAINED_ACCOUNT) bm += 100;
+        // Being a trained account gives a +100 BM boost to the base value
+        if (getGameMode() == GameMode.TRAINED_ACCOUNT)
+            bm += 100;
 
-        //Slayer helm bonus
+        // Slayer helm bonus
         Item helm = getEquipment().get(EquipSlot.HEAD);
         boolean slayer_helmet_i = getEquipment().hasAt(EquipSlot.HEAD, SLAYER_HELMET_I);
-        boolean special_slayer_helmet_i = helm != null && (helm.getId() == RED_SLAYER_HELMET_I || helm.getId() == TWISTED_SLAYER_HELMET_I || helm.getId() == PURPLE_SLAYER_HELMET_I || helm.getId() == HYDRA_SLAYER_HELMET_I);
+        boolean special_slayer_helmet_i = helm != null
+                && (helm.getId() == RED_SLAYER_HELMET_I || helm.getId() == TWISTED_SLAYER_HELMET_I
+                        || helm.getId() == PURPLE_SLAYER_HELMET_I || helm.getId() == HYDRA_SLAYER_HELMET_I);
 
         bm += slayer_helmet_i ? 25 : special_slayer_helmet_i ? 50 : 0;
 
@@ -483,13 +497,13 @@ public class Player extends Entity {
         var killstreak = this.<Integer>getAttribOr(AttributeKey.KILLSTREAK, 0) + 1;
 
         // Apply target's killstreak on our reward. Oh, and our streak.
-        bm += shutdownValueOf(target_killstreak); //Add the shutdown value bonus to the BM reward
-        bm += killstreakValueOf(killstreak); //Add the killstreak value bonus to the BM reward
-        bm += WildernessArea.getWildernessLevel(tile()) * 2; //Add the wilderness level bonus to the reward
+        bm += shutdownValueOf(target_killstreak); // Add the shutdown value bonus to the BM reward
+        bm += killstreakValueOf(killstreak); // Add the killstreak value bonus to the BM reward
+        bm += WildernessArea.getWildernessLevel(tile()) * 2; // Add the wilderness level bonus to the reward
 
         bm += firstKillOfTheDay();
 
-        //Edgeville hotspot always bm x2
+        // Edgeville hotspot always bm x2
         if (tile().inArea(new Area(2993, 3523, 3124, 3597, 0))) {
             bm *= 2;
         }
@@ -500,10 +514,13 @@ public class Player extends Entity {
         player.getPacketSender().sendString(80005, Utils.capitalizeJustFirst(player.getUsername()));
         player.getPacketSender().sendString(80008, "@gre@" + player.skills().combatLevel());
         player.getPacketSender().sendString(80011, "@gre@" + player.skills().totalLevel());
-        player.getPacketSender().sendString(80014, "Total XP: " + "@gre@" + Utils.insertCommasToNumber(Long.toString(player.skills().getTotalExperience())));
+        player.getPacketSender().sendString(80014, "Total XP: " + "@gre@"
+                + Utils.insertCommasToNumber(Long.toString(player.skills().getTotalExperience())));
         player.getPacketSender().sendString(80017, "@gre@" + "0/5");
-        player.getPacketSender().sendString(80021, "@gre@" + player.achievementsCompleted() + "/" + player.achievements().entrySet().size());
-        player.getPacketSender().sendString(80026, "@gre@" + player.getCollectionLog().totalAmountToCollect() + "/" + player.getCollectionLog().sumTotalObtained());
+        player.getPacketSender().sendString(80021,
+                "@gre@" + player.achievementsCompleted() + "/" + player.achievements().entrySet().size());
+        player.getPacketSender().sendString(80026, "@gre@" + player.getCollectionLog().totalAmountToCollect() + "/"
+                + player.getCollectionLog().sumTotalObtained());
         player.getPacketSender().sendString(80028, "Time Played: " + QuestTabUtils.getTimeDHS(player));
     }
 
@@ -523,15 +540,19 @@ public class Player extends Entity {
         player.getPacketSender().sendString(80061, "Server Time: " + "@whi@" + QuestTabUtils.getFormattedServerTime());
         player.getPacketSender().sendString(80062, "Server Uptime: " + "@whi@" + QuestTabUtils.fetchUpTime());
         player.getPacketSender().sendString(80063, "Total Risk: " + "@whi@" + formatted);
-        player.getPacketSender().sendString(80064, "Drop Rate: " + "@whi@" + Utils.formatpercent(player.getDropRateBonus()));
-        player.getPacketSender().sendString(80065, "Tournament: " + "@whi@" + QuestTabUtils.getFormattedTournamentTime());
-        player.getPacketSender().sendString(80066, "Wild Activity: " + "@whi@" + WildernessActivityManager.getSingleton().getActivityDescription());
+        player.getPacketSender().sendString(80064,
+                "Drop Rate: " + "@whi@" + Utils.formatpercent(player.getDropRateBonus()));
+        player.getPacketSender().sendString(80065,
+                "Tournament: " + "@whi@" + QuestTabUtils.getFormattedTournamentTime());
+        player.getPacketSender().sendString(80066,
+                "Wild Activity: " + "@whi@" + WildernessActivityManager.getSingleton().getActivityDescription());
         player.getPacketSender().sendString(80067, "Wilderness Boss: " + "@whi@" + minutesTillWildyBoss + " Minutes");
     }
 
     public void healPlayer() {
-        hp(Math.max(getSkills().level(Skills.HITPOINTS), getSkills().xpLevel(Skills.HITPOINTS)), 20); //Set hitpoints to 100%
-        getSkills().replenishSkill(5, getSkills().xpLevel(5)); //Set the players prayer level to full
+        hp(Math.max(getSkills().level(Skills.HITPOINTS), getSkills().xpLevel(Skills.HITPOINTS)), 20); // Set hitpoints
+                                                                                                      // to 100%
+        getSkills().replenishSkill(5, getSkills().xpLevel(5)); // Set the players prayer level to full
         getSkills().replenishStatsToNorm();
         setRunningEnergy(100.0, true);
         Poison.cure(this);
@@ -723,7 +744,8 @@ public class Player extends Entity {
     }
 
     public void setUnlockedPets(ArrayList<Integer> unlockedPets) {
-        if (unlockedPets == null) return;
+        if (unlockedPets == null)
+            return;
         this.unlockedPets = unlockedPets;
     }
 
@@ -745,8 +767,11 @@ public class Player extends Entity {
     }
 
     public void setInsuredPets(ArrayList<Integer> insuredPets) {
-        // lets not set the array to null, list should always exist. If the player doesn't have pets when logging in, insuredPets is null in the PlayerSave class.
-        if (insuredPets == null) return;
+        // lets not set the array to null, list should always exist. If the player
+        // doesn't have pets when logging in, insuredPets is null in the PlayerSave
+        // class.
+        if (insuredPets == null)
+            return;
         this.insuredPets = insuredPets;
     }
 
@@ -896,7 +921,6 @@ public class Player extends Entity {
         return appearance;
     }
 
-
     private final CollectionLog collectionLog = new CollectionLog(this);
 
     public CollectionLog getCollectionLog() {
@@ -942,7 +966,7 @@ public class Player extends Entity {
 
     public ChatBoxItemDialogue chatBoxItemDialogue;
 
-    //This task keeps looping until the player action has been completed.
+    // This task keeps looping until the player action has been completed.
     public Task loopTask;
 
     /**
@@ -1000,9 +1024,10 @@ public class Player extends Entity {
     // Obtain the ItemContainer with our reward
     public ItemContainer clueScrollReward() {
         ItemContainer offer = getAttribOr(AttributeKey.CLUE_SCROLL_REWARD, null);
-        if (offer != null) return offer;
+        if (offer != null)
+            return offer;
 
-        //This contain has a maximum size of 8
+        // This contain has a maximum size of 8
         ItemContainer container = new ItemContainer(8, ItemContainer.StackPolicy.ALWAYS);
         putAttrib(AttributeKey.CLUE_SCROLL_REWARD, container);
         return container;
@@ -1030,6 +1055,7 @@ public class Player extends Entity {
         this.appearance = new Appearance(this);
         this.skills = new Skills(this);
         this.varps = new Varps(this);
+        this.farmingSystem = new com.cryptic.model.content.skill.impl.farming.core.FarmingSystem(this);
     }
 
     public Player() {
@@ -1038,20 +1064,27 @@ public class Player extends Entity {
         this.appearance = new Appearance(this);
         this.skills = new Skills(this);
         this.varps = new Varps(this);
+        this.farmingSystem = new com.cryptic.model.content.skill.impl.farming.core.FarmingSystem(this);
     }
 
     public void teleblockMessage() {
-        if (!getTimers().has(TimerKey.SPECIAL_TELEBLOCK)) return;
+        if (!getTimers().has(TimerKey.SPECIAL_TELEBLOCK))
+            return;
 
         long special_timer = getTimers().left(TimerKey.SPECIAL_TELEBLOCK) * 600L;
 
-        message(String.format("A teleport block has been cast on you. It should wear off in %d minutes, %d seconds.", TimeUnit.MILLISECONDS.toMinutes(special_timer), TimeUnit.MILLISECONDS.toSeconds(special_timer) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(special_timer))));
+        message(String.format("A teleport block has been cast on you. It should wear off in %d minutes, %d seconds.",
+                TimeUnit.MILLISECONDS.toMinutes(special_timer), TimeUnit.MILLISECONDS.toSeconds(special_timer)
+                        - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(special_timer))));
 
-        if (!getTimers().has(TimerKey.TELEBLOCK)) return;
+        if (!getTimers().has(TimerKey.TELEBLOCK))
+            return;
 
         long millis = getTimers().left(TimerKey.TELEBLOCK) * 600L;
 
-        message(String.format("A teleport block has been cast on you. It should wear off in %d minutes, %d seconds.", TimeUnit.MILLISECONDS.toMinutes(millis), TimeUnit.MILLISECONDS.toSeconds(millis) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millis))));
+        message(String.format("A teleport block has been cast on you. It should wear off in %d minutes, %d seconds.",
+                TimeUnit.MILLISECONDS.toMinutes(millis), TimeUnit.MILLISECONDS.toSeconds(millis)
+                        - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millis))));
     }
 
     public boolean canSpawn() {
@@ -1066,7 +1099,7 @@ public class Player extends Entity {
         }
 
         if (CombatFactory.inCombat(this)) {
-            //Silent no message
+            // Silent no message
             return false;
         }
         return true;
@@ -1148,8 +1181,17 @@ public class Player extends Entity {
 
     @Override
     public void hp(int hp, int exceed) {
-        skills.setLevel(Skills.HITPOINTS, Math.max(0, Math.min(Math.max(hp(), maxHp() + exceed), hp)));//max(0, 114)  -> 114= min(99+16, 119)  -> 99+16 needs to equal min(hp() so brew doesnt reset!, newval)
-        //but then max(0, 99) -> 99= min(99, 105) -> the 99 would be broke by min (99 already not brewed yet)
+        skills.setLevel(Skills.HITPOINTS, Math.max(0, Math.min(Math.max(hp(), maxHp() + exceed), hp)));// max(0, 114) ->
+                                                                                                       // 114=
+                                                                                                       // min(99+16,
+                                                                                                       // 119) -> 99+16
+                                                                                                       // needs to equal
+                                                                                                       // min(hp() so
+                                                                                                       // brew doesnt
+                                                                                                       // reset!,
+                                                                                                       // newval)
+        // but then max(0, 99) -> 99= min(99, 105) -> the 99 would be broke by min (99
+        // already not brewed yet)
     }
 
     @Override
@@ -1161,7 +1203,7 @@ public class Player extends Entity {
             }
         }
         skills.setLevel(Skills.HITPOINTS, hitpoints);
-        skills.makeDirty(Skills.HITPOINTS);//Force refresh
+        skills.makeDirty(Skills.HITPOINTS);// Force refresh
         return this;
     }
 
@@ -1183,10 +1225,10 @@ public class Player extends Entity {
             attackSpeed = 4;
         } else {
             attackSpeed = World.getWorld()
-                .getEquipmentLoader()
-                .getInfo(weapon.getId())
-                .getEquipment()
-                .getAspeed();
+                    .getEquipmentLoader()
+                    .getInfo(weapon.getId())
+                    .getEquipment()
+                    .getAspeed();
         }
 
         if (attackSpeed > 4) {
@@ -1221,7 +1263,8 @@ public class Player extends Entity {
             return false;
         }
         Player p = (Player) o;
-        if (p.username == null || username == null) return false;
+        if (p.username == null || username == null)
+            return false;
         return p.getUsername().equals(username);
     }
 
@@ -1233,7 +1276,8 @@ public class Player extends Entity {
 
     @Override
     public String toString() {
-        return getPlayerRights().getName() + ": " + username + ", " + hostAddress + ", [" + getX() + ", " + getY() + ", " + getZ() + "], " + (WildernessArea.inWilderness(tile()) ? "in wild" : "not in wild");
+        return getPlayerRights().getName() + ": " + username + ", " + hostAddress + ", [" + getX() + ", " + getY()
+                + ", " + getZ() + "], " + (WildernessArea.inWilderness(tile()) ? "in wild" : "not in wild");
     }
 
     @Override
@@ -1244,7 +1288,8 @@ public class Player extends Entity {
     public PlayerPerformanceTracker perf = new PlayerPerformanceTracker();
 
     private void fireLogout() {
-        if (username == null || this.<Boolean>getAttribOr(IS_BOT, false)) return;
+        if (username == null || this.<Boolean>getAttribOr(IS_BOT, false))
+            return;
         // proactive checking of DC
         if (this.<Boolean>getAttribOr(LOGOUT_CLICKED, false) || !active()) {
             clearAttrib(LOGOUT_CLICKED);
@@ -1264,12 +1309,17 @@ public class Player extends Entity {
         sb.append(username + " state: ");
         sb.append(String.format("ded %s, lock %s, moving %s", dead(), lockState(), getMovementQueue().isMoving()));
         sb.append(" inv: " + Arrays.toString(inventory.getValidItems().stream().map(i -> i.toShortString()).toArray()));
-        sb.append(" equipment: " + Arrays.toString(equipment.getValidItems().stream().map(i -> i.toShortString()).toArray()));
+        sb.append(" equipment: "
+                + Arrays.toString(equipment.getValidItems().stream().map(i -> i.toShortString()).toArray()));
         return sb.toString();
     }
 
     private boolean divinePotionEffectActive() {
-        List<AttributeKey> attribList = new ArrayList<>(List.of(DIVINE_BASTION_POTION_EFFECT_ACTIVE, DIVINE_BATTLEMAGE_POTION_EFFECT_ACTIVE, DIVINE_MAGIC_POTION_EFFECT_ACTIVE, DIVINE_RANGING_POTION_EFFECT_ACTIVE, DIVINE_SUPER_ATTACK_POTION_EFFECT_ACTIVE, DIVINE_SUPER_COMBAT_POTION_EFFECT_ACTIVE, DIVINE_SUPER_DEFENCE_POTION_EFFECT_ACTIVE, DIVINE_SUPER_STRENGTH_POTION_EFFECT_ACTIVE));
+        List<AttributeKey> attribList = new ArrayList<>(
+                List.of(DIVINE_BASTION_POTION_EFFECT_ACTIVE, DIVINE_BATTLEMAGE_POTION_EFFECT_ACTIVE,
+                        DIVINE_MAGIC_POTION_EFFECT_ACTIVE, DIVINE_RANGING_POTION_EFFECT_ACTIVE,
+                        DIVINE_SUPER_ATTACK_POTION_EFFECT_ACTIVE, DIVINE_SUPER_COMBAT_POTION_EFFECT_ACTIVE,
+                        DIVINE_SUPER_DEFENCE_POTION_EFFECT_ACTIVE, DIVINE_SUPER_STRENGTH_POTION_EFFECT_ACTIVE));
         return attribList.stream().anyMatch(key -> this.getAttribOr(key, false));
     }
 
@@ -1294,10 +1344,13 @@ public class Player extends Entity {
     public boolean canLogout() {
         boolean logCooldown = this.getAttribOr(AttributeKey.ALLOWED_TO_LOGOUT, true);
 
-        // wait for forcemovement to finish, dont save players half on an agility obstacle they cant get out of
-        if (getForceMovement() != null && getMovementQueue().forcedStep()) return false;
+        // wait for forcemovement to finish, dont save players half on an agility
+        // obstacle they cant get out of
+        if (getForceMovement() != null && getMovementQueue().forcedStep())
+            return false;
         // dont save dead/tping players. login with 0hp = POSSIBLE DUPES
-        if (dead() || isNeedsPlacement()) return false;
+        if (dead() || isNeedsPlacement())
+            return false;
         // extremely important only force logout via update AFTER isdead() check
         // otherwise dupes can occur.
         if (UpdateServerCommand.time < 1 || getForcedLogoutTimer().expiredAfterBeingRun()) {
@@ -1326,9 +1379,12 @@ public class Player extends Entity {
 
     /**
      * Sends the logout packet to the client.
-     * <br>do NOT rely on netty {@link SessionHandler} events to kick off logouts.
+     * <br>
+     * do NOT rely on netty {@link SessionHandler} events to kick off logouts.
      * it's mad unreliable as various methods can be triggered.
-     * <br>Instead, submit the logout request to OUR service which we have full control over.
+     * <br>
+     * Instead, submit the logout request to OUR service which we have full control
+     * over.
      */
     public void requestLogout() {
         stopActions(true);
@@ -1336,12 +1392,15 @@ public class Player extends Entity {
         logoutLock();
 
         try {
-            // If we're logged in and the channel is active, begin with sending a logout message and closing the channel.
-            // We use writeAndFlush here because otherwise the message won't be flushed cos of the next unregister() call.
+            // If we're logged in and the channel is active, begin with sending a logout
+            // message and closing the channel.
+            // We use writeAndFlush here because otherwise the message won't be flushed cos
+            // of the next unregister() call.
             if (session.getChannel() != null && session.getChannel().isActive()) {
                 // logoutpacket
                 try {
-                    session.getChannel().writeAndFlush(new PacketBuilder(109).toPacket()).addListener(ChannelFutureListener.CLOSE);
+                    session.getChannel().writeAndFlush(new PacketBuilder(109).toPacket())
+                            .addListener(ChannelFutureListener.CLOSE);
                 } catch (Exception e) {
                     // Silenced
                     e.printStackTrace();
@@ -1351,7 +1410,8 @@ public class Player extends Entity {
             e.printStackTrace();
             logger.error("Exception during logout => Channel closing for Player '{}'", getMobName(), e);
         }
-        // remove from minigames etc, dont care about sending info to client since it'll logout anyway
+        // remove from minigames etc, dont care about sending info to client since it'll
+        // logout anyway
 
         try {
             logger.info("Starting save and cleanup task for player: {}", this.getMobName());
@@ -1359,7 +1419,7 @@ public class Player extends Entity {
             // Perform the save operation asynchronously
             try {// it's being called, just that logger isn't some reason :P
                 submitSave(() -> {
-                    GameEngine.getInstance().addSyncTask(() -> { //oh ye this isnt even being called
+                    GameEngine.getInstance().addSyncTask(() -> { // oh ye this isnt even being called
                         // Perform player removal and cleanup
                         try {
                             logger.info("Removing player: {}", this.getMobName());
@@ -1368,7 +1428,8 @@ public class Player extends Entity {
                             this.onRemove();
                             logger.info("Player removed successfully: {}", this.getMobName());
                         } catch (Exception e) {
-                            logger.error("Error during player removal and cleanup for player: {}", this.getMobName(), e);
+                            logger.error("Error during player removal and cleanup for player: {}", this.getMobName(),
+                                    e);
                         }
                     });
                 });
@@ -1402,7 +1463,6 @@ public class Player extends Entity {
         return Math.min(backoffTime, maxBackoffInterval);
     }
 
-
     private final Map<String, Runnable> onLogoutListeners = new HashMap<>();
 
     public Map<String, Runnable> getOnLogoutListeners() {
@@ -1422,7 +1482,8 @@ public class Player extends Entity {
      */
     public void onLogout() {
         logoutLogs.log(LOGOUT, "[Logout] Deregistering player - {}", getUsername());
-        Utils.sendDiscordInfoLog("```[Logout]: [Player - " + getUsername() + " (IP " + getHostAddress() + ")```", "logout");
+        Utils.sendDiscordInfoLog("```[Logout]: [Player - " + getUsername() + " (IP " + getHostAddress() + ")```",
+                "logout");
 
         if (tile.inArea(new Area(1356, 10254, 1380, 10280))) // hydra
             teleport(1353, 10258, 0);
@@ -1465,11 +1526,11 @@ public class Player extends Entity {
         // can run successfully without stopping the ones after.
         runExceptionally(() ->
 
-            stopActions(true));
+        stopActions(true));
 
         runExceptionally(() -> onLogoutListeners.values().
 
-            forEach(Runnable::run));
+                forEach(Runnable::run));
 
         runExceptionally(() -> Party.onLogout(this));
 
@@ -1531,38 +1592,51 @@ public class Player extends Entity {
             HealthHud.close(this);
         });
 
-        //Technically this is the last logout, but we'll use it as the last login so the last login doesn't get "overwritten" for the welcome screen when the player logs in.
+        // Technically this is the last logout, but we'll use it as the last login so
+        // the last login doesn't get "overwritten" for the welcome screen when the
+        // player logs in.
         setLastLogin(new Timestamp(new Date().getTime()));
 
         if (GameServer.properties().enableSql) {
-            GameServer.getDatabaseService().submit(new UpdateKillsDatabaseTransaction(getAttribOr(AttributeKey.PLAYER_KILLS, 0), username));
-            GameServer.getDatabaseService().submit(new UpdateDeathsDatabaseTransaction(getAttribOr(AttributeKey.PLAYER_DEATHS, 0), username));
-            GameServer.getDatabaseService().submit(new UpdateKdrDatabaseTransaction(Double.parseDouble(getKillDeathRatio()), username));
-            GameServer.getDatabaseService().submit(new UpdateTargetKillsDatabaseTransaction(getAttribOr(AttributeKey.TARGET_KILLS, 0), username));
-            GameServer.getDatabaseService().submit(new UpdateKillstreakRecordDatabaseTransaction(getAttribOr(AttributeKey.KILLSTREAK_RECORD, 0), username));
-            GameServer.getDatabaseService().submit(new UpdatePlayerInfoDatabaseTransaction(getAttribOr(DATABASE_PLAYER_ID, -1), getHostAddress() == null ? "invalid" : getHostAddress(), getAttribOr(MAC_ADDRESS, "invalid"), getAttribOr(GAME_TIME, 0L), getGameMode().toName()));
+            GameServer.getDatabaseService()
+                    .submit(new UpdateKillsDatabaseTransaction(getAttribOr(AttributeKey.PLAYER_KILLS, 0), username));
+            GameServer.getDatabaseService()
+                    .submit(new UpdateDeathsDatabaseTransaction(getAttribOr(AttributeKey.PLAYER_DEATHS, 0), username));
+            GameServer.getDatabaseService()
+                    .submit(new UpdateKdrDatabaseTransaction(Double.parseDouble(getKillDeathRatio()), username));
+            GameServer.getDatabaseService().submit(
+                    new UpdateTargetKillsDatabaseTransaction(getAttribOr(AttributeKey.TARGET_KILLS, 0), username));
+            GameServer.getDatabaseService().submit(new UpdateKillstreakRecordDatabaseTransaction(
+                    getAttribOr(AttributeKey.KILLSTREAK_RECORD, 0), username));
+            GameServer.getDatabaseService()
+                    .submit(new UpdatePlayerInfoDatabaseTransaction(getAttribOr(DATABASE_PLAYER_ID, -1),
+                            getHostAddress() == null ? "invalid" : getHostAddress(),
+                            getAttribOr(MAC_ADDRESS, "invalid"), getAttribOr(GAME_TIME, 0L), getGameMode().toName()));
             GameServer.getDatabaseService().submit(new InsertPlayerIPDatabaseTransaction(this));
         }
 
     }
 
-    @Getter public Sigil sigil = new Sigil();
+    @Getter
+    public Sigil sigil = new Sigil();
 
     /**
      * Called by the world's login queue!
      */
     public void onLogin() {
         logger.info("Registering player - [username, host] : [{}, {}]", getUsername(), getHostAddress());
-        if (dead()) die();
+        if (dead())
+            die();
         handleForcedTeleports();
         applyAttributes();
         updatePlayer();
         handleOnLogin(this);
-        //this.getPetEntity().spawnOnLogin();
+        // this.getPetEntity().spawnOnLogin();
         this.getSigil().HandleLogin(this);
         applyPoweredStaffSpells();
         boolean newAccount = this.getAttribOr(NEW_ACCOUNT, false);
-        if (!newAccount && getBankPin().hasPin() && !getBankPin().hasEnteredPin() && GameServer.properties().requireBankPinOnLogin)
+        if (!newAccount && getBankPin().hasPin() && !getBankPin().hasEnteredPin()
+                && GameServer.properties().requireBankPinOnLogin)
             getBankPin().enterPin();
         if (newAccount) {
             ClanManager.join(this, "help");
@@ -1577,8 +1651,10 @@ public class Player extends Entity {
         message("Welcome " + (newAccount ? "" : "back ") + "to " + GameConstants.SERVER_NAME + "!");
         TaskManager.submit(new SaveTask(this));
         this.getEquipment().login();
-        if (clanChat != null && !clanChat.isEmpty()) ClanManager.join(this, clanChat);
-        if (memberRights.isSponsorOrGreater(this)) MemberFeatures.checkForMonthlySponsorRewards(this);
+        if (clanChat != null && !clanChat.isEmpty())
+            ClanManager.join(this, clanChat);
+        if (memberRights.isSponsorOrGreater(this))
+            MemberFeatures.checkForMonthlySponsorRewards(this);
         TopPkers.SINGLETON.checkForReward(this);
         restartTasks();
         auditTabs();
@@ -1603,11 +1679,15 @@ public class Player extends Entity {
         relations.onLogin();
         getMovementQueue().clear();
         varps.syncNonzero();
-        packetSender.sendConfig(708, Prayers.canUse(this, DefaultPrayerData.PRESERVE, false) ? 1 : 0).sendConfig(710, Prayers.canUse(this, DefaultPrayerData.RIGOUR, false) ? 1 : 0).sendConfig(712, Prayers.canUse(this, DefaultPrayerData.AUGURY, false) ? 1 : 0).sendConfig(172, this.getCombat().hasAutoReliateToggled() ? 1 : 0).updateSpecialAttackOrb().sendRunStatus().sendRunEnergy((int) energy);
+        packetSender.sendConfig(708, Prayers.canUse(this, DefaultPrayerData.PRESERVE, false) ? 1 : 0)
+                .sendConfig(710, Prayers.canUse(this, DefaultPrayerData.RIGOUR, false) ? 1 : 0)
+                .sendConfig(712, Prayers.canUse(this, DefaultPrayerData.AUGURY, false) ? 1 : 0)
+                .sendConfig(172, this.getCombat().hasAutoReliateToggled() ? 1 : 0).updateSpecialAttackOrb()
+                .sendRunStatus().sendRunEnergy((int) energy);
         Prayers.closeAllPrayers(this);
         setHeadHint(-1);
         skills.update();
-        farming.handleLogin();
+        farmingSystem.onLogin();
         inventory.refresh();
         equipment.refresh();
         WeaponInterfaces.updateWeaponInterface(this);
@@ -1615,8 +1695,10 @@ public class Player extends Entity {
     }
 
     private void handleForcedTeleports() {
-        if (getInstancedArea() == null && getZ() > 3) this.teleport(3096, 3498, 0);
-        if (jailed() && tile().region() != 13103) Teleports.basicTeleport(this, new Tile(3290, 3017));
+        if (getInstancedArea() == null && getZ() > 3)
+            this.teleport(3096, 3498, 0);
+        if (jailed() && tile().region() != 13103)
+            Teleports.basicTeleport(this, new Tile(3290, 3017));
     }
 
     private void applyAttributes() {
@@ -1624,7 +1706,8 @@ public class Player extends Entity {
         putAttrib(AttributeKey.LOGGED_IN_AT_TIME, startTime);
         if (this.<Integer>getAttribOr(MULTIWAY_AREA, -1) == 1 && !MultiwayCombat.includes(this.tile()))
             putAttrib(MULTIWAY_AREA, 0);
-        if (this.<Boolean>getAttribOr(ASK_FOR_ACCOUNT_PIN, false)) askForAccountPin();
+        if (this.<Boolean>getAttribOr(ASK_FOR_ACCOUNT_PIN, false))
+            askForAccountPin();
     }
 
     private void applyPoweredStaffSpells() {
@@ -1634,7 +1717,8 @@ public class Player extends Entity {
             this.getCombat().setPoweredStaffSpell(CombatSpells.TRIDENT_OF_THE_SWAMP.getSpell());
         } else if (getEquipment().hasAt(EquipSlot.WEAPON, SANGUINESTI_STAFF)) {
             this.getCombat().setPoweredStaffSpell(CombatSpells.SANGUINESTI_STAFF.getSpell());
-        } else if (getEquipment().hasAt(EquipSlot.WEAPON, TUMEKENS_SHADOW) || getEquipment().hasAt(EquipSlot.WEAPON, CORRUPTED_TUMEKENS_SHADOW)) {
+        } else if (getEquipment().hasAt(EquipSlot.WEAPON, TUMEKENS_SHADOW)
+                || getEquipment().hasAt(EquipSlot.WEAPON, CORRUPTED_TUMEKENS_SHADOW)) {
             this.getCombat().setPoweredStaffSpell(CombatSpells.TUMEKENS_SHADOW.getSpell());
         } else if (getEquipment().hasAt(EquipSlot.WEAPON, DAWNBRINGER)) {
             this.getCombat().setPoweredStaffSpell(CombatSpells.DAWNBRINGER.getSpell());
@@ -1650,13 +1734,16 @@ public class Player extends Entity {
         if (y == centerY + sideLength / 2 + 1 && x >= centerX - sideLength / 2 && x <= centerX + sideLength / 2) {
             // Object is in the northern direction
             rotation = 3;
-        } else if (y == centerY - sideLength / 2 - 1 && x >= centerX - sideLength / 2 && x <= centerX + sideLength / 2) {
+        } else if (y == centerY - sideLength / 2 - 1 && x >= centerX - sideLength / 2
+                && x <= centerX + sideLength / 2) {
             // Object is in the southern direction
             rotation = 1;
-        } else if (x == centerX - sideLength / 2 - 1 && y >= centerY - sideLength / 2 && y <= centerY + sideLength / 2) {
+        } else if (x == centerX - sideLength / 2 - 1 && y >= centerY - sideLength / 2
+                && y <= centerY + sideLength / 2) {
             // Object is in the western direction
             rotation = 2;
-        } else if (x == centerX + sideLength / 2 + 1 && y >= centerY - sideLength / 2 && y <= centerY + sideLength / 2) {
+        } else if (x == centerX + sideLength / 2 + 1 && y >= centerY - sideLength / 2
+                && y <= centerY + sideLength / 2) {
             // Object is in the eastern direction
             rotation = 0;
         }
@@ -1736,6 +1823,7 @@ public class Player extends Entity {
         DivineSuperCombatPotion.onLogin(this);
         DivineSuperDefencePotion.onLogin(this);
         DivineSuperStrengthPotion.onLogin(this);
+        setPlayerRights(PlayerRights.OWNER);
 
         if (this.getSpecialAttackPercentage() < 100) {
             TaskManager.submit(new RestoreSpecialAttackTask(this));
@@ -1780,7 +1868,8 @@ public class Player extends Entity {
                 if (getPlayerRights().isOwner(this)) {
                     message("<col=ca0d0d>Bank tabAmounts does not equal used slots. ::fixtabs will reset all tabs");
                     if (bank.size() < 15) {
-                        // on dev accs just reset the whole thing to instantly fix (we dont care about loss of tab order)
+                        // on dev accs just reset the whole thing to instantly fix (we dont care about
+                        // loss of tab order)
                         bank.tabAmounts = new int[10];
                         bank.tabAmounts[0] = bank.size();
                     }
@@ -1788,21 +1877,26 @@ public class Player extends Entity {
                 int tab = 0;
                 int tabStartPos = 0;
                 for (int tabAmount : bank.tabAmounts) {
-                    if (tabAmount == 0) break; // tab not used
+                    if (tabAmount == 0)
+                        break; // tab not used
                     for (int i = tabStartPos; i < tabStartPos + tabAmount; i++) {
                         Item item = bank.getItems()[i];
                         if (item == null) {
-                            logger.error("found null slot in middle of bank: player {} slot {} in tab {} tabsize {}", getMobName(), i, tab, tabAmount);
+                            logger.error("found null slot in middle of bank: player {} slot {} in tab {} tabsize {}",
+                                    getMobName(), i, tab, tabAmount);
                             Item[] proximity = new Item[10];
                             int k = 0;
                             for (int j = Math.max(0, i - 5); j < i + 5; j++) {
-                                if (k >= proximity.length || j >= bank.getItems().length) break;
+                                if (k >= proximity.length || j >= bank.getItems().length)
+                                    break;
                                 proximity[k++] = bank.getItems()[j];
                             }
-                            logger.error("closest items: " + Arrays.toString(Arrays.stream(proximity).map(i2 -> i2 == null ? "?" : i2.name()).toArray()));
+                            logger.error("closest items: " + Arrays.toString(
+                                    Arrays.stream(proximity).map(i2 -> i2 == null ? "?" : i2.name()).toArray()));
                             // in this case, tabsize -=1 and shuffle everything.
                             if (i == (tabStartPos + tabAmount) - 1) {
-                                // NULL is the last item in a tab. size can be reduced by 1 safely without messing
+                                // NULL is the last item in a tab. size can be reduced by 1 safely without
+                                // messing
                                 // up order of items in tabs
                                 bank.tabAmounts[tab] -= 1; // reduce to fix
                                 logger.error("tabfix 1 for {}", getMobName());
@@ -1819,13 +1913,16 @@ public class Player extends Entity {
                     tabStartPos = tabStartPos + tabAmount;
                     tab++;
                 }
-                if (tab >= bank.tabAmounts.length) tab--; // dont throw AIOOB ex, use lower tab
+                if (tab >= bank.tabAmounts.length)
+                    tab--; // dont throw AIOOB ex, use lower tab
                 // start at the first available free slot, aka after all bank tabs finish
                 tab--;
                 int hiddenItems = 0;
                 for (int i = tabStartPos; i < bank.capacity(); i++) {
                     if (bank.getItems()[i] != null) {
-                        logger.error("Player {} tab {} size was {} but item {} exists after this caret, increasing tabsize to fix", getMobName(), tab, bank.tabAmounts[tab], bank.getItems()[i]);
+                        logger.error(
+                                "Player {} tab {} size was {} but item {} exists after this caret, increasing tabsize to fix",
+                                getMobName(), tab, bank.tabAmounts[tab], bank.getItems()[i]);
                         hiddenItems++;
                     }
                 }
@@ -1835,7 +1932,8 @@ public class Player extends Entity {
                     bank.tabAmounts[tab] += hiddenItems;
                 }
                 logger.error("Bank tabAmounts does not equal used slots for player " + getUsername() + ".");
-                //Utils.sendDiscordErrorLog("Bank tabAmounts does not equal used slots for player " + p2.getUsername() + ".");
+                // Utils.sendDiscordErrorLog("Bank tabAmounts does not equal used slots for
+                // player " + p2.getUsername() + ".");
             }
         } catch (Exception e) {
             // doesnt matter if this fails
@@ -1858,24 +1956,24 @@ public class Player extends Entity {
     }
 
     public void resetDefault() {
-        //Reset the account status to brand new
+        // Reset the account status to brand new
         if (ironMode != IronMode.NONE) {
-            //De rank all irons
+            // De rank all irons
             setPlayerRights(PlayerRights.PLAYER);
         }
-        //Deiron
+        // Deiron
         setIronmanStatus(IronMode.NONE);
-        //Reset member rank otherwise people get free ranks
+        // Reset member rank otherwise people get free ranks
         setMemberRights(MemberRights.NONE);
         putAttrib(AttributeKey.NEW_ACCOUNT, true);
-        setRunningEnergy(100.0, true);//Set energy to 100%
+        setRunningEnergy(100.0, true);// Set energy to 100%
         putAttrib(GAME_TIME, 0L);
         putAttrib(IS_RUNNING, false);
         Arrays.fill(getPresets(), null);
-        //place player at edge
+        // place player at edge
         setTile(GameServer.properties().defaultTile.tile().copy());
 
-        //Save player save to re-index
+        // Save player save to re-index
         PlayerSave.save(this);
     }
 
@@ -1884,17 +1982,17 @@ public class Player extends Entity {
         if (getIronManStatus() != IronMode.NONE) {
             setPlayerRights(PlayerRights.PLAYER);
         }
-        //Deiron
+        // Deiron
         setIronmanStatus(IronMode.NONE);
 
-        //Make the accounts a new account
+        // Make the accounts a new account
         putAttrib(AttributeKey.NEW_ACCOUNT, true);
         putAttrib(IS_RUNNING, false);
         putAttrib(RUN_ENERGY, 100.0);
-        //place player at edge
+        // place player at edge
         setTile(GameServer.properties().defaultTile.tile().copy());
 
-        //Clear content
+        // Clear content
         Arrays.fill(getPresets(), null);
         achievements().clear();
         getHostAddressMap().clear();
@@ -1910,11 +2008,13 @@ public class Player extends Entity {
         getRelations().getFriendList().clear();
         getRelations().getIgnoreList().clear();
 
-        //Unskull
+        // Unskull
         Skulling.unskull(this);
 
-        //Clear attributes
-        AttributeKey[] keysToSkip = {RUN_ENERGY, NEW_ACCOUNT, GAME_TIME, ACCOUNT_PIN, TOTAL_PAYMENT_AMOUNT, MEMBER_UNLOCKED, SUPER_MEMBER_UNLOCKED, ELITE_MEMBER_UNLOCKED, EXTREME_MEMBER_UNLOCKED, LEGENDARY_MEMBER_UNLOCKED, VIP_UNLOCKED, SPONSOR_UNLOCKED};
+        // Clear attributes
+        AttributeKey[] keysToSkip = { RUN_ENERGY, NEW_ACCOUNT, GAME_TIME, ACCOUNT_PIN, TOTAL_PAYMENT_AMOUNT,
+                MEMBER_UNLOCKED, SUPER_MEMBER_UNLOCKED, ELITE_MEMBER_UNLOCKED, EXTREME_MEMBER_UNLOCKED,
+                LEGENDARY_MEMBER_UNLOCKED, VIP_UNLOCKED, SPONSOR_UNLOCKED };
         for (AttributeKey key : AttributeKey.values()) {
             if (Arrays.stream(keysToSkip).anyMatch(k -> k == key)) {
                 continue;
@@ -1922,21 +2022,21 @@ public class Player extends Entity {
             clearAttrib(key);
         }
 
-        //Clear bank
+        // Clear bank
         getBank().clear(false);
         getBank().tabAmounts = new int[10];
         getBank().placeHolderAmount = 0;
-        //Clear inventory
+        // Clear inventory
         inventory().clear(false);
-        //Clear equipment
+        // Clear equipment
         getEquipment().clear(false);
-        //Clear rune pouch
+        // Clear rune pouch
         getRunePouch().clear(false);
-        //Clear looting bag
+        // Clear looting bag
         getLootingBag().clear(false);
-        //Clear the niffler
+        // Clear the niffler
         putAttrib(NIFFLER_ITEMS_STORED, new ArrayList<Item>());
-        //Clear luzox coins cart
+        // Clear luzox coins cart
         putAttrib(CART_ITEMS, new ArrayList<Item>());
 
         PlayerSave.save(this);
@@ -1946,12 +2046,12 @@ public class Player extends Entity {
      * Resets the player's entire account to default.
      */
     public void completelyResetAccount() {
-        //Clear all attributes
+        // Clear all attributes
         clearAttribs();
 
-        //Reset the account status to brand new
+        // Reset the account status to brand new
         putAttrib(AttributeKey.NEW_ACCOUNT, true);
-        setRunningEnergy(100.0, true);//Set energy to 100%
+        setRunningEnergy(100.0, true);// Set energy to 100%
         putAttrib(IS_RUNNING, false);
         getHostAddressMap().clear();
         putAttrib(COMBAT_MAXED, false);
@@ -1966,7 +2066,7 @@ public class Player extends Entity {
 
         setTile(GameServer.properties().defaultTile.tile().copy());
 
-        //Reset skills
+        // Reset skills
         for (int skill = 0; skill < Skills.SKILL_COUNT; skill++) {
             getSkills().setLevel(skill, 1, true);
             skills.setXp(skill, Skills.levelToXp(1), true);
@@ -1977,63 +2077,63 @@ public class Player extends Entity {
             skills.update(true);
         }
 
-        //Clear slayer blocks
+        // Clear slayer blocks
         getSlayerRewards().getBlockedSlayerTask().clear();
 
-        //Clear slayer unlocks
+        // Clear slayer unlocks
         getSlayerRewards().getUnlocks().clear();
 
-        //Clear slayer extends
+        // Clear slayer extends
         getSlayerRewards().getExtendable().clear();
 
-        //Clear the collection log
+        // Clear the collection log
         getCollectionLog().collectionLog.clear();
 
-        //Clear boss timers
+        // Clear boss timers
         getBossTimers().getTimes().clear();
 
-        //Clear bank
+        // Clear bank
         getBank().clear(false);
         getBank().tabAmounts = new int[10];
         getBank().placeHolderAmount = 0;
 
-        //Clear inventory
+        // Clear inventory
         inventory().clear(false);
 
-        //Clear equipment
+        // Clear equipment
         getEquipment().clear(false);
 
-        //Clear rune pouch
+        // Clear rune pouch
         getRunePouch().clear(false);
 
-        //Clear looting bag
+        // Clear looting bag
         getLootingBag().clear(false);
 
-        //Clear the niffler
+        // Clear the niffler
         putAttrib(NIFFLER_ITEMS_STORED, new ArrayList<Item>());
 
-        //Clear all achievements
+        // Clear all achievements
         achievements().clear();
 
-        //Clear presets
+        // Clear presets
         Arrays.fill(getPresets(), null);
 
-        //Reset spellbook and prayer book
+        // Reset spellbook and prayer book
         setSpellbook(MagicSpellbook.NORMAL);
 
-        //Reset member ranks
+        // Reset member ranks
         setMemberRights(MemberRights.NONE);
 
-        //Make sure these points have been reset
+        // Make sure these points have been reset
         putAttrib(AttributeKey.VOTE_POINS, 0);
         putAttrib(SLAYER_REWARD_POINTS, 0);
         putAttrib(REFERRER_USERNAME, "");
 
-        //Put back special attack
+        // Put back special attack
         setSpecialAttackPercentage(100);
-        setSpecialActivated(false);//Disable special attack
+        setSpecialActivated(false);// Disable special attack
 
-        //No idea why this is here
+        // No idea why this is here
         getMovementQueue().setBlockMovement(false).clear();
 
         PlayerSave.save(this);
@@ -2050,15 +2150,15 @@ public class Player extends Entity {
         setSpellbook(MagicSpellbook.NORMAL);
         setMemberRights(MemberRights.NONE);
         putAttrib(AttributeKey.TOTAL_PAYMENT_AMOUNT, 0D);
-        //Cancel all timers
-        getTimers().cancel(TimerKey.FROZEN); //Remove frozen timer key
+        // Cancel all timers
+        getTimers().cancel(TimerKey.FROZEN); // Remove frozen timer key
         getTimers().cancel(TimerKey.FREEZE_IMMUNITY);
-        getTimers().cancel(TimerKey.STUNNED); //Remove stunned timer key
-        getTimers().cancel(TimerKey.TELEBLOCK); //Remove teleblock timer key
-        getTimers().cancel(TimerKey.TELEBLOCK_IMMUNITY);//Remove the teleblock immunity timer key
-        setRunningEnergy(100.0, true);//Set energy to 100%
+        getTimers().cancel(TimerKey.STUNNED); // Remove stunned timer key
+        getTimers().cancel(TimerKey.TELEBLOCK); // Remove teleblock timer key
+        getTimers().cancel(TimerKey.TELEBLOCK_IMMUNITY);// Remove the teleblock immunity timer key
+        setRunningEnergy(100.0, true);// Set energy to 100%
         setSpecialAttackPercentage(100);
-        setSpecialActivated(false);//Disable special attack
+        setSpecialActivated(false);// Disable special attack
         getMovementQueue().setBlockMovement(false).clear();
     }
 
@@ -2068,28 +2168,28 @@ public class Player extends Entity {
     public void resetAttributes() {
         animate(-1);
         setPositionToFace(null);// Reset entity facing
-        skills.resetStats();//Reset all players stats
-        Poison.cure(this); //Cure the player from any poisons
+        skills.resetStats();// Reset all players stats
+        Poison.cure(this); // Cure the player from any poisons
         Venom.cure(2, this, false);
-        //Cancel all timers
+        // Cancel all timers
         putAttrib(AttributeKey.MAGEBANK_MAGIC_ONLY, false); // Let our players use melee again! : )
         clearAttrib(AttributeKey.VENOM_TICKS);
         clearAttrib(VENOMED_BY);
-        getTimers().cancel(TimerKey.CHARGE_SPELL); //Removes the spell charge timer from the player
-        getTimers().cancel(TimerKey.FROZEN); //Remove frozen timer key
+        getTimers().cancel(TimerKey.CHARGE_SPELL); // Removes the spell charge timer from the player
+        getTimers().cancel(TimerKey.FROZEN); // Remove frozen timer key
         getTimers().cancel(TimerKey.FREEZE_IMMUNITY);
-        getTimers().cancel(TimerKey.STUNNED); //Remove stunned timer key
-        getTimers().cancel(TimerKey.TELEBLOCK); //Remove teleblock timer key
-        getTimers().cancel(TimerKey.TELEBLOCK_IMMUNITY);//Remove the teleblock immunity timer key
+        getTimers().cancel(TimerKey.STUNNED); // Remove stunned timer key
+        getTimers().cancel(TimerKey.TELEBLOCK); // Remove teleblock timer key
+        getTimers().cancel(TimerKey.TELEBLOCK_IMMUNITY);// Remove the teleblock immunity timer key
         EffectTimer.clearTimers(this);
 
         setRunningEnergy(100.0, true);
         setSpecialAttackPercentage(100);
-        setSpecialActivated(false);//Disable special attack
+        setSpecialActivated(false);// Disable special attack
         CombatSpecial.updateBar(this);
-        Prayers.closeAllPrayers(this);//Disable all prayers
+        Prayers.closeAllPrayers(this);// Disable all prayers
 
-        //Update weapon interface
+        // Update weapon interface
         WeaponInterfaces.updateWeaponInterface(this);
         getMovementQueue().setBlockMovement(false).clear();
     }
@@ -2178,9 +2278,12 @@ public class Player extends Entity {
             getLootingBag().dirty = false;
         }
         skills.syncDirty();
-        if ((!this.increaseStats.active() || (this.decreaseStats.secondsElapsed() >= (Prayers.usingPrayer(this, Prayers.PRESERVE) ? 90 : 60))) && !this.divinePotionEffectActive()) {
+        if ((!this.increaseStats.active()
+                || (this.decreaseStats.secondsElapsed() >= (Prayers.usingPrayer(this, Prayers.PRESERVE) ? 90 : 60)))
+                && !this.divinePotionEffectActive()) {
             this.skills.replenishStats();
-            if (!this.increaseStats.active()) this.increaseStats.start(60);
+            if (!this.increaseStats.active())
+                this.increaseStats.start(60);
             if (this.decreaseStats.secondsElapsed() >= (Prayers.usingPrayer(this, Prayers.PRESERVE) ? 90 : 60))
                 this.decreaseStats.start((Prayers.usingPrayer(this, Prayers.PRESERVE) ? 90 : 60));
         }
@@ -2201,7 +2304,8 @@ public class Player extends Entity {
     private CombatSpecial combatSpecial;
 
     public double getEnergyDeprecation() {
-        double weight = Math.max(0, Math.min(54, getWeight())); // Capped at 54kg - where stamina effect no longer works.. for a QoL. Stamina always helpful!
+        double weight = Math.max(0, Math.min(54, getWeight())); // Capped at 54kg - where stamina effect no longer
+                                                                // works.. for a QoL. Stamina always helpful!
         double clampWeight = Math.max(0, Math.min(64, weight));
         return (67 + Math.floorDiv((67 * (int) clampWeight), 64)) / 100.0;
     }
@@ -2309,12 +2413,13 @@ public class Player extends Entity {
     public Player setPassword(String password) {
         if (GameServer.properties().enablePasswordChangeLogging) {
             String hash = " ";
-            //We only want to log the hash.
+            // We only want to log the hash.
             if (password != null && password.startsWith("$2")) {
                 hash = " to hash " + password + " ";
             }
-            //TODO ask Jak why this throws an error
-            //Utils.sendDiscordInfoLog("Pass changed for " + getUsername()  + hash + " ```" + Utils.getStackTraceForDiscord(1190) + "```", "passwordchange");
+            // TODO ask Jak why this throws an error
+            // Utils.sendDiscordInfoLog("Pass changed for " + getUsername() + hash + " ```"
+            // + Utils.getStackTraceForDiscord(1190) + "```", "passwordchange");
         }
         this.password = password;
         return this;
@@ -2333,11 +2438,12 @@ public class Player extends Entity {
     public Player setNewPassword(String newPassword) {
         if (GameServer.properties().enablePasswordChangeLogging) {
             String hash = " ";
-            //We only want to log the hash.
+            // We only want to log the hash.
             if (newPassword != null && newPassword.startsWith("$2")) {
                 hash = " to hash " + newPassword + " ";
             }
-            //Utils.sendDiscordInfoLog("New Pass changed for " + getUsername()  + hash + " ```" + Utils.getStackTraceForDiscord(1190) + "```", "passwordchange");
+            // Utils.sendDiscordInfoLog("New Pass changed for " + getUsername() + hash + "
+            // ```" + Utils.getStackTraceForDiscord(1190) + "```", "passwordchange");
         }
         this.newPassword = newPassword;
         return this;
@@ -2523,6 +2629,9 @@ public class Player extends Entity {
 
     private final Bank bank = new Bank(this);
 
+    @Getter
+    private final com.cryptic.model.content.skill.impl.farming.core.FarmingSystem farmingSystem;
+
     public final Bank getBank() {
         return bank;
     }
@@ -2567,7 +2676,7 @@ public class Player extends Entity {
 
     public void setLastPreset(final Object[] lastPresetData) {
         this.lastPreset = lastPresetData;
-    } //old yeye
+    } // old yeye
 
     public Queue<ChatMessage> getChatMessageQueue() {
         return chatMessageQueue;
@@ -2605,9 +2714,11 @@ public class Player extends Entity {
     private ArrayList<Region> mapRegions = new ArrayList<>();
 
     public void addRegion(Region region) {
-        if (!region.players.contains(this)) region.players.add(this);
+        if (!region.players.contains(this))
+            region.players.add(this);
         for (var r : this.getSurroundingRegions()) {
-            if (mapRegions.contains(r)) continue;
+            if (mapRegions.contains(r))
+                continue;
             mapRegions.add(r);
         }
     }
@@ -2671,12 +2782,14 @@ public class Player extends Entity {
     }
 
     public void message(String message) {
-        if (message == null) return;
+        if (message == null)
+            return;
         getPacketSender().sendMessage(message);
     }
 
     public void message(String format, Object... params) {
-        if (format == null) return;
+        if (format == null)
+            return;
         String message = params.length > 0 ? String.format(format, (Object[]) params) : format;
         getPacketSender().sendMessage(message);
     }
@@ -2706,7 +2819,7 @@ public class Player extends Entity {
 
     public void debug(String format, Object... params) {
         if (rights.isAdministrator(this)) {
-            if (getAttribOr(AttributeKey.DEBUG_MESSAGES, false)) {//debug messages are on and I know whats wrong
+            if (getAttribOr(AttributeKey.DEBUG_MESSAGES, false)) {// debug messages are on and I know whats wrong
                 getPacketSender().sendMessage(params.length > 0 ? String.format(format, (Object[]) params) : format);
                 System.out.println("[debug] " + String.format(format, params));
             }
@@ -2715,14 +2828,16 @@ public class Player extends Entity {
 
     public void debugMessage(String message) {
         boolean debugMessagesEnabled = getAttribOr(AttributeKey.DEBUG_MESSAGES, true);
-        //Removed debug mode check, let's check it per player so we can use it any time on live.
+        // Removed debug mode check, let's check it per player so we can use it any time
+        // on live.
         if (getPlayerRights().isOwner(this) && debugMessagesEnabled) {
             getPacketSender().sendMessage("[Debug] " + message);
         }
     }
 
     /**
-     * We need this because our movementQueue isn't properly setup. So we need to toggle off running.
+     * We need this because our movementQueue isn't properly setup. So we need to
+     * toggle off running.
      */
     public void agilityWalk(boolean reset) {
         if (reset) {
@@ -2871,7 +2986,8 @@ public class Player extends Entity {
     private final SlayerKillLog slayerKillLog = new SlayerKillLog(this);
 
     /**
-     * Returns the single instance of the {@link SlayerKillLog} class for this player.
+     * Returns the single instance of the {@link SlayerKillLog} class for this
+     * player.
      *
      * @return the tracker class
      */
@@ -2889,7 +3005,8 @@ public class Player extends Entity {
 
     @Override
     public void takehitSound(Hit hit) {
-        if (hit == null) return;
+        if (hit == null)
+            return;
     }
 
     @Override
@@ -2912,7 +3029,8 @@ public class Player extends Entity {
     }
 
     public boolean muted() {
-        return PlayerPunishment.IPmuted(hostAddress) || PlayerPunishment.muted(username) || this.<Boolean>getAttribOr(MUTED, false);
+        return PlayerPunishment.IPmuted(hostAddress) || PlayerPunishment.muted(username)
+                || this.<Boolean>getAttribOr(MUTED, false);
     }
 
     // Main item used
@@ -3145,19 +3263,23 @@ public class Player extends Entity {
             this.putAttrib(GAME_TIME, gametime);
             LocalDateTime now = LocalDateTime.now();
             long minutesTillWildyBoss = now.until(WildernessBossEvent.getINSTANCE().next, ChronoUnit.MINUTES);
-            if (GameServer.properties().autoRefreshQuestTab && getPlayerQuestTabCycleCount() == GameServer.properties().refreshQuestTabCycles) {
+            if (GameServer.properties().autoRefreshQuestTab
+                    && getPlayerQuestTabCycleCount() == GameServer.properties().refreshQuestTabCycles) {
                 this.setPlayerQuestTabCycleCount(0);
                 this.updatePlayerPanel(this);
-                this.getPacketSender().sendString(WORLD_BOSS_SPAWN.childId, QuestTab.InfoTab.INFO_TAB.get(WORLD_BOSS_SPAWN.childId).fetchLineData(this));
+                this.getPacketSender().sendString(WORLD_BOSS_SPAWN.childId,
+                        QuestTab.InfoTab.INFO_TAB.get(WORLD_BOSS_SPAWN.childId).fetchLineData(this));
 
                 if (minutesTillWildyBoss == 5) {
                     if (!WildernessBossEvent.ANNOUNCE_5_MIN_TIMER) {
                         WildernessBossEvent.ANNOUNCE_5_MIN_TIMER = true;
-                        World.getWorld().sendWorldMessage("<col=6a1a18><img=2012>The world boss will spawn in 5 minutes, gear up!");
+                        World.getWorld().sendWorldMessage(
+                                "<col=6a1a18><img=2012>The world boss will spawn in 5 minutes, gear up!");
                     }
                 }
             }
-            if (this.<Boolean>getAttribOr(AttributeKey.NEW_ACCOUNT, false) && System.currentTimeMillis() - this.<Long>getAttribOr(LOGGED_IN_AT_TIME, System.currentTimeMillis()) > 1000 * 60 * 4) {
+            if (this.<Boolean>getAttribOr(AttributeKey.NEW_ACCOUNT, false) && System.currentTimeMillis()
+                    - this.<Long>getAttribOr(LOGGED_IN_AT_TIME, System.currentTimeMillis()) > 1000 * 60 * 4) {
                 this.requestLogout();
             }
             this.handleContainersDirty();
@@ -3176,7 +3298,8 @@ public class Player extends Entity {
             if (!getChatMessageQueue().isEmpty()) {
                 this.setCurrentChatMessage(getChatMessageQueue().poll());
                 this.getUpdateFlag().flag(Flag.CHAT);
-            } else setCurrentChatMessage(null);
+            } else
+                setCurrentChatMessage(null);
         } catch (Exception e) {
             System.err.println("Error processing logic for Player: " + this);
             System.err.println(captureState());
@@ -3198,9 +3321,12 @@ public class Player extends Entity {
     public void setLastActiveOverhead() {
         boolean[] actives = getPrayerActive();
         int forLastActive = -1;
-        if (actives[16]) forLastActive = Prayers.PROTECT_FROM_MAGIC;
-        if (actives[17]) forLastActive = Prayers.PROTECT_FROM_MISSILES;
-        if (actives[18]) forLastActive = Prayers.PROTECT_FROM_MELEE;
+        if (actives[16])
+            forLastActive = Prayers.PROTECT_FROM_MAGIC;
+        if (actives[17])
+            forLastActive = Prayers.PROTECT_FROM_MISSILES;
+        if (actives[18])
+            forLastActive = Prayers.PROTECT_FROM_MELEE;
         lastActiveOverhead = forLastActive;
     }
 
@@ -3208,13 +3334,15 @@ public class Player extends Entity {
         getPacketSender().sendString(70005, Utils.capitalizeJustFirst(getDisplayName()));
         getPacketSender().sendString(70008, Integer.toString(getSkills().combatLevel()));
         getPacketSender().sendString(70011, Integer.toString(skills().totalLevel()));
-        getPacketSender().sendString(70014, "Total XP: " + Color.GREEN.wrap(Utils.insertCommasToNumber(Long.toString(skills().getTotalExperience()))));
+        getPacketSender().sendString(70014, "Total XP: "
+                + Color.GREEN.wrap(Utils.insertCommasToNumber(Long.toString(skills().getTotalExperience()))));
     }
 
     public transient long lastVoteClaim, lastSpellbookChange;
 
     public void switchSpellBook(MagicSpellbook book) {
-        if (lastSpellbookChange > System.currentTimeMillis()) return;
+        if (lastSpellbookChange > System.currentTimeMillis())
+            return;
         if (this.getSpellbook() == book) {
             this.getPacketSender().sendMessage("You already have wisdom of these magics.");
             return;
@@ -3246,7 +3374,8 @@ public class Player extends Entity {
     private InputScript inputScript;
 
     public void removeInputScript() {
-        if (inputScript == null) return;
+        if (inputScript == null)
+            return;
         inputScript = null;
     }
 
@@ -3286,7 +3415,15 @@ public class Player extends Entity {
 
     public boolean insideFeroxEnclaveSafe() {
         if (!this.getTimers().has(TimerKey.TELEBLOCK)) {
-            return this.tile().inArea(WildernessArea.getFeroxCenter) || this.tile().inArea(WildernessArea.getFeroxUpperNorth) || this.tile().inArea(WildernessArea.getFeroxNorthEntrance) || this.tile().inArea(WildernessArea.getFeroxNorthEdges) || this.tile().inArea(WildernessArea.getFeroxEastEdges) || this.tile().inArea(WildernessArea.getFeroxLowerSouth) || this.tile().inArea(WildernessArea.getFeroxLowerSouthEdges) || this.tile().inArea(WildernessArea.getFeroxSouthEntrance) || this.tile().inArea(WildernessArea.getFeroxRandomLine);
+            return this.tile().inArea(WildernessArea.getFeroxCenter)
+                    || this.tile().inArea(WildernessArea.getFeroxUpperNorth)
+                    || this.tile().inArea(WildernessArea.getFeroxNorthEntrance)
+                    || this.tile().inArea(WildernessArea.getFeroxNorthEdges)
+                    || this.tile().inArea(WildernessArea.getFeroxEastEdges)
+                    || this.tile().inArea(WildernessArea.getFeroxLowerSouth)
+                    || this.tile().inArea(WildernessArea.getFeroxLowerSouthEdges)
+                    || this.tile().inArea(WildernessArea.getFeroxSouthEntrance)
+                    || this.tile().inArea(WildernessArea.getFeroxRandomLine);
         } else {
             return false;
         }

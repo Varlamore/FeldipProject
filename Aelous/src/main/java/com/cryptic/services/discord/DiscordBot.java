@@ -25,7 +25,10 @@ public class DiscordBot {
 
     public static final long GUILD_ID = 956723981501743104L;
 
-    private static final String TOKEN = "YOUR_TOKEN_HERE";
+    // TODO: Replace with your Discord bot token from environment variable or config
+    // file
+    // Example: System.getenv("DISCORD_BOT_TOKEN") or load from a .properties file
+    private static final String KEY_ID = "YOUR_DISCORD_BOT_TOKEN_HERE";
 
     public static boolean isDiscordBotOnline;
 

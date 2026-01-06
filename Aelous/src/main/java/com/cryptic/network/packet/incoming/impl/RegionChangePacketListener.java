@@ -14,6 +14,7 @@ import org.apache.logging.log4j.Logger;
 
 public class RegionChangePacketListener implements PacketListener {
     private static final Logger logger = LogManager.getLogger(RegionChangePacketListener.class);
+
     @Override
     public void handleMessage(Player player, Packet packet) {
         if (player.isAllowRegionChangePacket()) {
@@ -22,12 +23,13 @@ public class RegionChangePacketListener implements PacketListener {
                 player.getPacketSender().deleteRegionalSpawns();
                 GroundItemHandler.updateRegionItems(player);
                 Tile.update(player);
-                player.getFarming().regionChanged();
+                player.getFarmingSystem().onLogin();
                 PacketInteractionManager.onRegionChange(player);
                 player.setAllowRegionChangePacket(false);
                 player.afkTimer.reset();
             } catch (Exception e) {
-                logger.error(player + " has encountered an error loading region " + player.tile().region() + " regionid " + player.tile().region());
+                logger.error(player + " has encountered an error loading region " + player.tile().region()
+                        + " regionid " + player.tile().region());
                 logger.error("sadge", e);
             }
         }

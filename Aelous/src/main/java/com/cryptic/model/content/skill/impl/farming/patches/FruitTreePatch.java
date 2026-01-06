@@ -14,6 +14,10 @@ public class FruitTreePatch extends FarmingPatch {
         super(player, bottomLeft, topRight, varbit, PatchType.FRUIT_TREE);
     }
 
+    // Tracks the timestamp (ms) of the last fruit growth/regeneration for real-time
+    // 45m timer
+    private long lastGrowthTime;
+
     @Override
     public boolean handleItemInteraction(int itemId) {
         if (!canInteract())
@@ -29,6 +33,48 @@ public class FruitTreePatch extends FarmingPatch {
             return true;
         }
 
+        // Compost
+        if (itemId == 6032) { // Normal
+            treat(1);
+            player.inventory().remove(new com.cryptic.model.items.Item(6032, 1));
+            player.inventory().add(new com.cryptic.model.items.Item(1925, 1)); // Bucket
+            player.animate(2283);
+            player.getPacketSender().sendSoundEffect(2435, 1, 0); // Sound
+            return true;
+        }
+        if (itemId == 6034) { // Super
+            treat(2);
+            player.inventory().remove(new com.cryptic.model.items.Item(6034, 1));
+            player.inventory().add(new com.cryptic.model.items.Item(1925, 1));
+            player.animate(2283);
+            player.getPacketSender().sendSoundEffect(2435, 1, 0); // Sound
+            return true;
+        }
+        if (itemId == 21483) { // Ultra
+            treat(3);
+            player.inventory().remove(new com.cryptic.model.items.Item(21483, 1));
+            player.inventory().add(new com.cryptic.model.items.Item(1925, 1));
+            player.animate(2283);
+            player.getPacketSender().sendSoundEffect(2435, 1, 0); // Sound
+            return true;
+        }
+
+        // Cure
+        if (itemId == 6036) { // Plant Cure
+            cure();
+            player.inventory().remove(new com.cryptic.model.items.Item(6036, 1));
+            player.inventory().add(new com.cryptic.model.items.Item(229, 1)); // Vial
+            player.animate(2288);
+            player.getPacketSender().sendSoundEffect(2438, 1, 0); // Sound
+            return true;
+        }
+
+        // Pruning with Secateurs
+        if (itemId == ItemIdentifiers.SECATEURS || itemId == ItemIdentifiers.MAGIC_SECATEURS) {
+            prune(itemId == ItemIdentifiers.MAGIC_SECATEURS);
+            return true;
+        }
+
         // Planting Logic
         FarmingPlant plantDef = FarmingPlant.forSeed(itemId);
         if (plantDef != null) {
@@ -37,6 +83,78 @@ public class FruitTreePatch extends FarmingPatch {
         }
 
         return false;
+    }
+
+    public void protect() {
+        if (plant != null) {
+            plant.setProtectedByGardener(true);
+            player.message("You protect the fruit tree.");
+        }
+    }
+
+    public void treat(int type) {
+        player.putAttrib(com.cryptic.model.entity.attributes.AttributeKey.COMPOST_STATE, type);
+        String name = type == 1 ? "compost" : (type == 2 ? "supercompost" : "ultracompost");
+        player.message("You treat the fruit tree with " + name + ".");
+    }
+
+    public void cure() {
+        if (plant == null)
+            return;
+
+        if (lifecycle == PatchLifecycle.DISEASED) {
+            player.message("You cure the fruit tree.");
+            player.animate(2288);
+            player.getPacketSender().sendSoundEffect(2438, 1, 0);
+
+            plant.setDiseased(false);
+            lifecycle = PatchLifecycle.GROWING;
+            updateVarbit();
+        } else {
+            player.message("This plant doesn't need curing.");
+        }
+    }
+
+    private void prune(boolean magicSecateurs) {
+        if (plant == null) {
+            player.message("There is nothing to prune here.");
+            return;
+        }
+
+        if (lifecycle == PatchLifecycle.DEAD) {
+            player.message("This tree is dead. You need to clear it with a spade.");
+            return;
+        }
+
+        if (lifecycle == PatchLifecycle.FULLY_GROWN) {
+            player.message("Fully grown fruit trees cannot become diseased.");
+            return;
+        }
+
+        if (lifecycle != PatchLifecycle.DISEASED) {
+            player.message("This tree doesn't need pruning.");
+            return;
+        }
+
+        // OSRS: 75% success rate with regular secateurs
+        // Magic secateurs could have 100% success rate or other bonuses
+        double successRate = magicSecateurs ? 1.0 : 0.75;
+
+        player.animate(2275); // Pruning animation
+        player.lock();
+        player.getPacketSender().sendSoundEffect(2440, 1, 0); // Pruning sound
+
+        com.cryptic.utility.chainedwork.Chain.bound(player).runFn(2, () -> {
+            if (Math.random() < successRate) {
+                player.message("You successfully prune the diseased leaves.");
+                plant.setDiseased(false);
+                lifecycle = PatchLifecycle.GROWING;
+                updateVarbit();
+            } else {
+                player.message("There are still diseased leaves left on the tree.");
+            }
+            player.unlock();
+        });
     }
 
     private void attemptPlant(FarmingPlant plantDef) {
@@ -62,6 +180,7 @@ public class FruitTreePatch extends FarmingPatch {
         int faceY = bottomLeft.y * 2 + 4;
         player.setPositionToFace(new Tile(faceX, faceY));
         player.inventory().remove(plantDef.getSeedId(), 1);
+        player.getPacketSender().sendSoundEffect(1470, 0, 0); // Tree Planting Sound
         player.message("You plant the sapling in the fruit tree patch.");
 
         // Initialize the plant
@@ -81,77 +200,117 @@ public class FruitTreePatch extends FarmingPatch {
 
     @Override
     public void process(int currentGlobalTick) {
-        if (plant == null || lifecycle == PatchLifecycle.WEEDS || lifecycle == PatchLifecycle.EMPTY
-                || lifecycle == PatchLifecycle.DEAD || lifecycle == PatchLifecycle.STUMP) {
+        // Weed Growth Logic
+        if (lifecycle == PatchLifecycle.EMPTY || lifecycle == PatchLifecycle.WEEDS) {
+            if (weeds < 3) { // 3 = Full Weeds
+                if (nextGrowthTick <= 0) {
+                    // 5 minutes per weed stage (Approx 500 ticks? OSRS is 5 mins)
+                    // Using 100 ticks for testing speed, or 500 for realism.
+                    // 1 tick = 0.6s. 5 mins = 300s = 500 ticks.
+                    nextGrowthTick = currentGlobalTick + 500;
+                }
+                if (currentGlobalTick >= nextGrowthTick) {
+                    weeds++;
+                    lifecycle = PatchLifecycle.WEEDS;
+                    nextGrowthTick = currentGlobalTick + 500;
+                    updateVarbit();
+                    // System.out.println("Weeds grew! Count: " + weeds);
+                }
+            }
             return;
         }
-        if (lifecycle == PatchLifecycle.GROWING) {
-            plant.setCyclesAccumulated(plant.getCyclesAccumulated() + 1);
-            if (plant.getCyclesAccumulated() >= plant.getType().getCyclesPerStage()) {
-                plant.setCyclesAccumulated(0);
 
-                if (plant.isDiseased()) {
-                    // Previously diseased -> Died
-                    plant.setDiseased(false);
-                    plant.setDead(true);
-                    lifecycle = PatchLifecycle.DEAD;
-                    player.message("A fruit tree you planted has died.");
-                } else {
-                    // Normalize growth logic
-                    boolean getsDiseased = !plant.isProtectedByGardener() && rollDisease();
-                    if (getsDiseased) {
-                        plant.setDiseased(true);
-                    } else {
-                        plant.setGrowthStage(plant.getGrowthStage() + 1);
-                        if (plant.isMature()) {
-                            lifecycle = PatchLifecycle.FULLY_GROWN;
-                            plant.setFruitCount(6);
-                            // Initialize regen timer to now + regen time so it doesn't regen immediately
-                            nextGrowthTick = currentGlobalTick + plant.getType().getRegenTicks();
-                            System.out.println("Tree matured. Fruit set to 6. Next regen at: " + nextGrowthTick);
-                            player.message("A fruit tree you planted has finished growing!");
-                        }
-                    }
-                }
-                updateVarbit();
-            }
-        } else if (lifecycle == PatchLifecycle.FULLY_GROWN) {
-            // Fruit regeneration
-            if (plant.getFruitCount() < 6 && plant.isHealthChecked()) {
-                if (nextGrowthTick <= 0) {
-                    nextGrowthTick = currentGlobalTick + plant.getType().getRegenTicks();
-                }
+        if (lifecycle == PatchLifecycle.DEAD || lifecycle == PatchLifecycle.FULLY_GROWN
+                || lifecycle == PatchLifecycle.STUMP) {
+            return;
+        }
 
-                // Fix for "Quick Respawn": If timer is way behind, catch up without granting
-                // fruit
-                if (nextGrowthTick < currentGlobalTick - plant.getType().getRegenTicks()) {
-                    System.out
-                            .println("Timer lag detected. Catching up " + nextGrowthTick + " -> " + currentGlobalTick);
-                    nextGrowthTick = currentGlobalTick;
-                }
+        if (plant == null)
+            return;
 
-                if (currentGlobalTick >= nextGrowthTick) {
-                    plant.setFruitCount(plant.getFruitCount() + 1);
-                    nextGrowthTick = currentGlobalTick + plant.getType().getRegenTicks();
+        // Growth/Disease Cycle
+        long cycleTime = plant.getType().getCyclesPerStage() * 60 * 1000L; // CyclesPerStage is now minutes, convert to
+                                                                           // milliseconds
+
+        if (System.currentTimeMillis() - lastGrowthTime > cycleTime) {
+
+            // 1. Disease Check
+            // Condition: Not already diseased, not protected, and current stage has a valid
+            // diseased form (!= -1)
+            int currentStage = plant.getGrowthStage();
+            int diseasedVarbit = plant.getType().getDiseasedVarbitValue(currentStage);
+
+            if (lifecycle != PatchLifecycle.DISEASED && !plant.isProtectedByGardener() && diseasedVarbit != -1) {
+                int diseaseChance = plant.getType().getDiseaseChance();
+                int compostState = player.getAttribOr(com.cryptic.model.entity.attributes.AttributeKey.COMPOST_STATE,
+                        0);
+
+                // Compost Reduction
+                if (compostState == 1)
+                    diseaseChance = (int) (diseaseChance * 0.5); // Normal
+                else if (compostState == 2)
+                    diseaseChance = (int) (diseaseChance * 0.2); // Super
+                else if (compostState == 3)
+                    diseaseChance = (int) (diseaseChance * 0.1); // Ultra
+
+                // Roll
+                if (com.cryptic.utility.Utils.random(127) <= diseaseChance) {
+                    lifecycle = PatchLifecycle.DISEASED;
                     updateVarbit();
-                    System.out.println("Regenerated 1 fruit. Count: " + plant.getFruitCount());
+                    // Do NOT update lastGrowthTime, so it can die next cycle if not cured?
+                    // Or does it wait another full cycle to die?
+                    // OSRS: "If a diseased plant is not cured by the next growth cycle, it dies."
+                    // So we reset time to wait for next cycle.
+                    lastGrowthTime = System.currentTimeMillis();
+                    return;
                 }
             }
-        } else if (lifecycle == PatchLifecycle.DISEASED) {
 
+            // 2. Death Check
+            if (lifecycle == PatchLifecycle.DISEASED) {
+                lifecycle = PatchLifecycle.DEAD;
+                updateVarbit();
+                return;
+            }
+
+            // 3. Growth
+            plant.incrementGrowthStage();
+            if (plant.getGrowthStage() >= plant.getType().getGrowthStages()) {
+                lifecycle = PatchLifecycle.FULLY_GROWN;
+                // Init fruit count to 6 on first growth
+                plant.setFruitCount(6);
+            }
+            lastGrowthTime = System.currentTimeMillis();
+            updateVarbit();
+        }
+
+        // Fruit Regeneration
+        // OSRS: 45 minutes per fruit.
+        // We use lastGrowthTime for regen tracking if fully grown
+        if (lifecycle == PatchLifecycle.FULLY_GROWN) {
+            if (plant.getFruitCount() < 6 && plant.isHealthChecked()) {
+                long regenTime = 45 * 60 * 1000L; // 45 Minutes
+
+                // If we switched from Growing -> FullyGrown, lastGrowthTime was set.
+                // So we can reuse lastGrowthTime as the "last regen time".
+
+                if (System.currentTimeMillis() - lastGrowthTime > regenTime) {
+                    plant.setFruitCount(plant.getFruitCount() + 1);
+                    lastGrowthTime = System.currentTimeMillis();
+                    updateVarbit();
+                    // player.message("A fruit has regenerated."); // Debug
+                }
+            }
         }
     }
 
-    private boolean rollDisease() {
-        int chance = 64; // Base OSRS
-        if (plant != null) {
-            switch (plant.getCompost()) {
-                case COMPOST -> chance *= 2;
-                case SUPERCOMPOST -> chance *= 5;
-                case ULTRACOMPOST -> chance *= 10;
-            }
+    public void regen() {
+        if (plant != null && lifecycle == PatchLifecycle.FULLY_GROWN && plant.getFruitCount() < 6) {
+            plant.setFruitCount(plant.getFruitCount() + 1);
+            lastGrowthTime = System.currentTimeMillis();
+            updateVarbit();
+            player.message("You force regenerate a fruit.");
         }
-        return Utils.random(chance) == 0;
     }
 
     @Override
@@ -161,83 +320,167 @@ public class FruitTreePatch extends FarmingPatch {
 
         // 1. Weeds / Empty Check
         if (lifecycle == PatchLifecycle.WEEDS) {
-            if (option == 1 || option == 2)
+            if (option == 1)
                 rake();
+            else if (option == 2)
+                player.message("This patch needs raking.");
             return;
         }
 
         if (lifecycle == PatchLifecycle.EMPTY) {
-            player.message("This fruit tree patch is empty.");
+            if (option == 1)
+                player.message("This fruit tree patch is empty.");
+            else if (option == 2)
+                player.message("You can planting a sapling here.");
             return;
         }
 
         // 2. Dead Checks
         if (lifecycle == PatchLifecycle.DEAD || (plant != null && plant.isDead())) {
-            player.message("The tree is dead. You need to clear it with a spade.");
+            if (option == 1) {
+                player.message("The tree is dead. You need to clear it with a spade.");
+            }
             return;
         }
 
         // 3. Growing State
         if (lifecycle == PatchLifecycle.GROWING) {
-            player.message("The tree is still growing.");
+            if (option == 1) { // Guide/Inspect
+                player.message("The tree is currently growing.");
+            }
             return;
         }
 
-        // 4. Fully Grown / Harvest / Health Check
+        // 4. Fully Grown Interactions
         if (lifecycle == PatchLifecycle.FULLY_GROWN || (plant != null && plant.isMature())) {
+            // Case A: Unchecked Health
             if (!plant.isHealthChecked()) {
-                // Tree is unchecked - client shows "Check-health" in slot 0 (option 1)
-                if (option == 1) {
-                    player.getSkills().addXp(Skills.FARMING, plant.getType().getCheckHealthXp());
-                    plant.setHealthChecked(true);
-                    plant.setFruitCount(6); // Initialize 6 fruit (OSRS standard)
-                    player.message("You examine the tree and find it in perfect health.");
-                    updateVarbit();
+                if (option == 1) { // "Check-health"
+                    player.message("You examine the tree...");
+                    player.animate(2282); // Examination animation (optional, reusing pick for now)
+
+                    // Delay for effect
+                    com.cryptic.utility.chainedwork.Chain.bound(player).runFn(2, () -> {
+                        player.getSkills().addXp(Skills.FARMING, plant.getType().getCheckHealthXp());
+                        plant.setHealthChecked(true);
+                        plant.setFruitCount(6); // Max fruit
+                        player.message("You find it in perfect health.");
+                        updateVarbit();
+                    });
                     return;
                 }
-                player.message("The tree needs to be checked for health.");
                 return;
             }
 
-            // Harvest Logic
-
-            if (option == 1) { // Harvest / Pick-fruit
-                if (plant.getFruitCount() > 0) {
-                    // Pick Fruit Logic
+            // Case B: Harvest (Fruit Available)
+            if (plant.getFruitCount() > 0) {
+                if (option == 1) { // "Pick-fruit"
                     if (player.inventory().isFull()) {
                         player.message("You don't have enough inventory space to pick the fruit.");
                         return;
                     }
+
+                    player.message("You begin to pick the fruit.");
                     player.animate(2282);
+                    player.lock();
+
+                    // Auto-pick / Repeating Task
                     com.cryptic.utility.chainedwork.Chain.bound(player).repeatingTask(3, t -> {
                         if (plant == null || plant.getFruitCount() <= 0) {
-                            t.stop();
-                            return;
-                        }
-                        if (player.inventory().isFull()) {
-                            player.message("Your inventory is full.");
+                            player.unlock();
                             player.animate(-1);
                             t.stop();
                             return;
                         }
-                        player.animate(2282);
+
+                        // Check inventory BEFORE action
+                        if (player.inventory().isFull()) {
+                            player.message("Your inventory is full.");
+                            player.unlock();
+                            player.animate(-1);
+                            t.stop();
+                            return;
+                        }
+
+                        player.getPacketSender().sendSoundEffect(2437, 0, 0); // Pick Fruit Sound
                         player.inventory().add(plant.getType().getHarvestItemId(), 1);
                         player.message("You pick a fruit from the tree.");
                         plant.setFruitCount(plant.getFruitCount() - 1);
                         player.getSkills().addXp(Skills.FARMING, plant.getType().getHarvestXp());
                         updateVarbit();
 
-                        if (plant.getFruitCount() <= 0) {
+                        if (plant.getFruitCount() > 0) {
+                            if (!player.inventory().isFull()) {
+                                player.animate(2282); // Continue animating
+                            }
+                        } else {
                             player.message("The tree is now empty.");
+                            player.unlock();
                             player.animate(-1);
                             t.stop();
                         }
                     });
-                } else {
-                    player.message("The tree has no fruit right now.");
+                }
+                return;
+            }
+
+            // Case C: Empty (0 Fruit)
+            if (plant.getFruitCount() <= 0) {
+                if (option == 1) { // "Pick Fruit" (Empty)
+                    player.getDialogueManager().start(new com.cryptic.model.inter.dialogue.Dialogue() {
+                        @Override
+                        protected void start(Object... parameters) {
+                            send(com.cryptic.model.inter.dialogue.DialogueType.OPTION,
+                                    "The fruit is currently regenerating.", "Cut it down", "Don't cut it down");
+                        }
+
+                        @Override
+                        protected void select(int option) {
+                            if (option == 1) {
+                                chop();
+                                stop();
+                            } else if (option == 2) {
+                                stop();
+                            }
+                        }
+                    });
+                } else if (option == 2) {
+                    player.message("The tree is currently empty. It will regrow fruit later.");
+                } else if (option == 3) {
+                    chop();
+                }
+            } else {
+                if (option == 3) { // "Chop down"
+                    chop();
                 }
             }
         }
+    }
+
+    private void chop() {
+        if (!player.inventory().contains(ItemIdentifiers.DRAGON_AXE) &&
+                !player.inventory().contains(ItemIdentifiers.RUNE_AXE) &&
+                !player.inventory().contains(ItemIdentifiers.ADAMANT_AXE) &&
+                !player.inventory().contains(ItemIdentifiers.MITHRIL_AXE) &&
+                !player.inventory().contains(ItemIdentifiers.BLACK_AXE) &&
+                !player.inventory().contains(ItemIdentifiers.STEEL_AXE) &&
+                !player.inventory().contains(ItemIdentifiers.IRON_AXE) &&
+                !player.inventory().contains(ItemIdentifiers.BRONZE_AXE) &&
+                !player.getEquipment().contains(ItemIdentifiers.DRAGON_AXE)) {
+            player.message("You need an axe to chop down this tree.");
+            return;
+        }
+
+        player.animate(879); // Chop animation
+        player.getPacketSender().sendSoundEffect(2735, 0, 0); // Woodcutting Sound (Generic Tree)
+        player.message("You chop down the tree.");
+
+        // Single swing for now as per user request (or short delay)
+        com.cryptic.utility.chainedwork.Chain.bound(player).runFn(2, () -> {
+            lifecycle = PatchLifecycle.STUMP;
+            updateVarbit();
+            player.animate(-1); // Stop animating
+        });
     }
 
     @Override
@@ -254,19 +497,32 @@ public class FruitTreePatch extends FarmingPatch {
         int faceX = bottomLeft.x * 2 + 4;
         int faceY = bottomLeft.y * 2 + 4;
         player.setPositionToFace(new Tile(faceX, faceY));
+
+        // Start animation immediately
+        player.animate(2273);
+        player.getPacketSender().sendSoundEffect(2442, 0, 0); // Raking Sound
+
         com.cryptic.utility.chainedwork.Chain.bound(player).repeatingTask(3, task -> {
             if (weeds > 0) {
-                player.animate(2273);
                 weeds--;
                 player.inventory().add(ItemIdentifiers.WEEDS, 1);
                 player.getSkills().addXp(Skills.FARMING, 4);
                 updateVarbit();
+
+                if (weeds > 0) {
+                    player.animate(2273); // Continue animating only if work remains
+                    player.getPacketSender().sendSoundEffect(2442, 0, 0); // Loop sound
+                } else {
+                    lifecycle = PatchLifecycle.EMPTY;
+                    player.unlock();
+                    player.message("You clear the patch completely.");
+                    task.stop();
+                    updateVarbit();
+                }
             } else {
-                lifecycle = PatchLifecycle.EMPTY;
-                player.unlock();
-                player.message("You clear the patch completely.");
+                // Fallback catch
                 task.stop();
-                updateVarbit();
+                player.unlock();
             }
         });
     }
@@ -300,18 +556,16 @@ public class FruitTreePatch extends FarmingPatch {
         if (lifecycle == PatchLifecycle.EMPTY)
             return 3;
 
-        if (plant == null) { // Should not happen if lifecycle is not WEEDS or EMPTY
-            // System.out.println("getVarbit: Returning default EMPTY due to null plant.");
-            // // Debug print removed
-            return 3; // Default to empty if plant is null unexpectedly
+        if (plant == null) {
+            return 3;
         }
 
-        // Priority 1: Check Health (Fully Grown)
+        // Priority 1: Check Health (Fully Grown, Unchecked)
         if (lifecycle == PatchLifecycle.FULLY_GROWN && !plant.isHealthChecked()) {
-            return plant.getType().getCheckHealthVarbitValue();
+            return plant.getType().getCheckHealthVarbitValue(); // 14 for Apple
         }
 
-        // Priority 2: Stump (Not Used for Fruit Trees)
+        // Priority 2: Stump
         if (lifecycle == PatchLifecycle.STUMP) {
             return plant.getType().getStumpVarbitValue();
         }
@@ -326,18 +580,22 @@ public class FruitTreePatch extends FarmingPatch {
             return plant.getType().getDiseasedVarbitValue(plant.getGrowthStage());
         }
 
-        // Priority 5: Harvest/Fruit Check (Only if healthy and mature)
-        if (lifecycle == PatchLifecycle.FULLY_GROWN) {
+        // Priority 5: Harvest/Fruit Check (Only if healthy and mature AND checked)
+        if (lifecycle == PatchLifecycle.FULLY_GROWN && plant.isHealthChecked()) {
             if (plant.getFruitCount() > 0) {
-                // Ensure we don't go out of bounds (1-6 fruits)
+                // 1 Fruit = 15, 6 Fruit = 20
                 int count = Math.min(6, Math.max(1, plant.getFruitCount()));
-
-                // For Apple: Base 15. 1 fruit = 15.
                 return plant.getType().getFruitStartingVarbitValue() + (count - 1);
             } else {
                 // 0 Fruit (Harvested state).
-                // Use Base + 6 (ID 14 for Apple).
-                return plant.getType().getStartingVarbitValue() + 6;
+                // Returning 14 causes "Check Health" option.
+                // We use Varp 1100 to handle the menu, so we CAN return 14 for correct visuals
+                // now!
+                int val = plant.getType().getCheckHealthVarbitValue();
+                // System.out.println("DEBUG: FruitTreePatch zero fruit. returning " + val + "
+                // for "
+                // + plant.getType().getClass().getSimpleName());
+                return val;
             }
         }
 
@@ -347,6 +605,39 @@ public class FruitTreePatch extends FarmingPatch {
         }
 
         return 3;
+    }
+
+    private void updateStateVarp() {
+        if (player == null)
+            return;
+
+        int state = 0;
+        if (lifecycle == PatchLifecycle.FULLY_GROWN) {
+            if (!plant.isHealthChecked()) {
+                state = 2; // Unchecked -> "Check-health"
+            } else if (plant.getFruitCount() == 0) {
+                state = 1; // Empty -> "Chop down"
+            }
+        }
+
+        // Update Varp 1100
+        var key = com.cryptic.model.entity.attributes.AttributeKey.FRUIT_TREE_STATE;
+        int currentVal = player.getAttribOr(key, 0);
+        int shift = (this.varbit % 16) * 2;
+        int mask = ~(3 << shift); // Clear bits
+        int newState = (state & 3) << shift;
+
+        int finalVal = (currentVal & mask) | newState;
+        if (currentVal != finalVal) {
+            player.putAttrib(key, finalVal);
+            player.getPacketSender().sendConfig(FarmingConstants.FRUIT_TREE_STATE_VARP, finalVal);
+        }
+    }
+
+    @Override
+    public void updateVarbit() {
+        super.updateVarbit();
+        updateStateVarp();
     }
 
     // Persistence helpers

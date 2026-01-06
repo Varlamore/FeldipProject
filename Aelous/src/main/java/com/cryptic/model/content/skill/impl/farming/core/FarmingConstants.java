@@ -21,4 +21,11 @@ public class FarmingConstants {
      * Interaction distances
      */
     public static final int INTERACTION_DISTANCE = 3;
+
+    /**
+     * Varp used to sync fruit tree state metadata to client.
+     * Bits: 0-1 (Patch 0), 2-3 (Patch 1), 4-5 (Patch 2), 6-7 (Patch 3).
+     * Value 0: Normal, 1: Unchecked, 2: Empty.
+     */
+    public static final int FRUIT_TREE_STATE_VARP = 1100;
 }

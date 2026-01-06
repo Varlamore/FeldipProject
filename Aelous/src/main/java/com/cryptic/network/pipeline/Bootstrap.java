@@ -47,7 +47,7 @@ public final class Bootstrap {
      * Creates a new {@link Bootstrap}.
      *
      * @param port
-     *            the port that the network handler will listen on.
+     *             the port that the network handler will listen on.
      */
     public Bootstrap(int port) {
         this.port = port;
@@ -57,7 +57,7 @@ public final class Bootstrap {
      * Binds the core of the server together and puts Eldritch online.
      *
      * @throws Exception
-     *             if any errors occur while putting the server online.
+     *                   if any errors occur while putting the server online.
      */
     public void bind() throws Exception {
         gameBuilder.initialize();
@@ -65,13 +65,15 @@ public final class Bootstrap {
         GwdLogic.onServerStart();
         HostBlacklist.loadBlacklist();
         if (GameServer.properties().enableDidYouKnowMessages) {
-            //TaskManager.submit(new DidYouKnowTask());
+            // TaskManager.submit(new DidYouKnowTask());
         }
-        if (GameServer.properties().enableWildernessBossEvents && GameServer.properties().pvpMode) {// Events only on PvP.
+        if (GameServer.properties().enableWildernessBossEvents && GameServer.properties().pvpMode) {// Events only on
+                                                                                                    // PvP.
             WildernessBossEvent.onServerStart();
             TopPkers.SINGLETON.init();
         }
         TaskManager.submit(new StarEventTask());
+        TaskManager.submit(new com.cryptic.model.content.skill.impl.farming.GlobalFarmingTask());
         Item.onServerStart();
 
         for (PetDefinitions value : PetDefinitions.values()) {

@@ -42,6 +42,10 @@ public class Plant {
         return type != null && growthStage >= type.getGrowthStages();
     }
 
+    public void incrementGrowthStage() {
+        this.growthStage++;
+    }
+
     public String getName() {
         return type == null ? "Unknown" : type.getClass().getSimpleName();
     }
