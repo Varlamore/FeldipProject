@@ -1,8 +1,0 @@
-0000000000000000000000000000000000000000 64dc5657aba57e82c055463d600de6b930ca962f Varlamore <Joshtremmel@hotmail.com> 1767661511 +1100	commit (initial): Initial commit - FeldipProject RSPS with farming system improvements
-64dc5657aba57e82c055463d600de6b930ca962f 0000000000000000000000000000000000000000 Varlamore <Joshtremmel@hotmail.com> 1767661524 +1100	Branch: renamed refs/heads/master to refs/heads/main
-0000000000000000000000000000000000000000 64dc5657aba57e82c055463d600de6b930ca962f Varlamore <Joshtremmel@hotmail.com> 1767661524 +1100	Branch: renamed refs/heads/master to refs/heads/main
-64dc5657aba57e82c055463d600de6b930ca962f 51478efcbf6c9462916cf68951e978871a436db5 Varlamore <Joshtremmel@hotmail.com> 1767661703 +1100	commit: Remove hardcoded Discord bot token for security
-51478efcbf6c9462916cf68951e978871a436db5 6c8ae6c9769fe83781fc105306322d736dad86df Varlamore <Joshtremmel@hotmail.com> 1767661771 +1100	commit: Clean up repository - remove build logs and temporary files
-0000000000000000000000000000000000000000 be13111dbe3898e36ee433f590bb8fca6b35e36a Varlamore <Joshtremmel@hotmail.com> 1767661813 +1100	commit (initial): Initial commit - FeldipProject RSPS
-be13111dbe3898e36ee433f590bb8fca6b35e36a 0000000000000000000000000000000000000000 Varlamore <Joshtremmel@hotmail.com> 1767661825 +1100	Branch: renamed refs/heads/clean-main to refs/heads/main
-0000000000000000000000000000000000000000 be13111dbe3898e36ee433f590bb8fca6b35e36a Varlamore <Joshtremmel@hotmail.com> 1767661825 +1100	Branch: renamed refs/heads/clean-main to refs/heads/main
