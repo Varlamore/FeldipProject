@@ -1,0 +1,12 @@
+**/.gradle/
+
+**/data/cache/temp/**
+
+**/build/
+!**/src/**/build/
+
+**/out/
+!**/src/**/out/
+
+/.idea/
+client.properties

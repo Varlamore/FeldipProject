@@ -1,0 +1,31 @@
+npcId:
+- 5935
+- 7206
+petItem: "null"
+petRarity: 0
+alwaysDrops: []
+drops:
+- item: BUCKET_OF_SAND
+  minimumAmount: 1
+  maximumAmount: 1
+  chance: 15
+  rareDrop: false
+  sendToBank: false
+- item: COPPER_ORE
+  minimumAmount: 3
+  maximumAmount: 3
+  chance: 15
+  rareDrop: false
+  sendToBank: false
+- item: EDIBLE_SEAWEED
+  minimumAmount: 2
+  maximumAmount: 2
+  chance: 15
+  rareDrop: false
+  sendToBank: false
+- item: COAL
+  minimumAmount: 2
+  maximumAmount: 2
+  chance: 31
+  rareDrop: false
+  sendToBank: false
